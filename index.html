@@ -414,17 +414,73 @@ async function changePassword(){
   showLoader(true);try{let {error}=await sb.auth.updateUser({password:p});if(error)throw error;setMsg("secMsg","Password changed successfully.","ok");$("newPass").value="";$("newPass2").value=""}catch(e){setMsg("secMsg",e.message)}finally{showLoader(false)}
 }
 async function loadAdminData(){
-  let {data,error}=await sb.from("student_profiles").select("id,student_number,full_name,section,course,academic_year,email,contact_number,birthdate,account_status").order("student_number");
-  if(error){toast("Student records could not be loaded.");return}roster=data||[];$("kTotal").textContent=roster.length;renderStudents();
+  /*
+   * The official names/blocks come from student_roster.
+   * student_profiles only exists after a student creates an account.
+   * Therefore the Admin roster must load the official roster first,
+   * then merge any registered profile information onto it.
+   */
+  showLoader(true);
+  try{
+    const {data:official,error:rosterError}=await sb
+      .from("student_roster")
+      .select("student_number,full_name,block,course,academic_year")
+      .order("student_number");
+
+    if(rosterError) throw rosterError;
+
+    const {data:profiles,error:profileError}=await sb
+      .from("student_profiles")
+      .select("id,student_number,full_name,section,course,academic_year,email,contact_number,birthdate,present_address,home_address,parent1_name,parent1_contact,parent2_name,parent2_contact,account_status")
+      .order("student_number");
+
+    if(profileError) throw profileError;
+
+    const byNumber=new Map((profiles||[]).map(p=>[p.student_number,p]));
+
+    roster=(official||[]).map(r=>{
+      const p=byNumber.get(r.student_number);
+      return {
+        id:p?.id||null,
+        student_number:r.student_number,
+        full_name:r.full_name,
+        section:r.block,
+        block:r.block,
+        course:r.course,
+        academic_year:r.academic_year,
+        email:p?.email||"",
+        contact_number:p?.contact_number||"",
+        birthdate:p?.birthdate||"",
+        present_address:p?.present_address||"",
+        home_address:p?.home_address||"",
+        parent1_name:p?.parent1_name||"",
+        parent1_contact:p?.parent1_contact||"",
+        parent2_name:p?.parent2_name||"",
+        parent2_contact:p?.parent2_contact||"",
+        account_status:p?.account_status||"Not Registered"
+      };
+    });
+
+    $("kTotal").textContent=roster.length;
+    renderStudents();
+    if($("gradeTable")) renderGradeTable();
+  }catch(e){
+    console.error(e);
+    toast("Student roster could not be loaded: "+(e.message||"Database error"));
+  }finally{
+    showLoader(false);
+  }
 }
 function renderStudents(){
   let q=$("studentSearch").value.trim().toLowerCase(),block=$("studentBlockFilter").value;
   let rows=roster.filter(x=>(!q||x.student_number.toLowerCase().includes(q)||x.full_name.toLowerCase().includes(q))&&(!block||x.section===block));
   if(!rows.length){$("studentTable").innerHTML='<div class="empty">No students found.</div>';return}
-  $("studentTable").innerHTML='<table class="table"><thead><tr><th>Student No.</th><th>Name</th><th>Block</th><th>Email</th><th>Status</th><th></th></tr></thead><tbody>'+rows.map(x=>`<tr><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.section)}</td><td>${esc(x.email||"—")}</td><td>${esc(x.account_status||"active")}</td><td><button class="btn secondary" style="padding:7px 10px" onclick="viewStudent('${x.id}')">VIEW</button></td></tr>`).join("")+'</tbody></table>';
+  $("studentTable").innerHTML='<table class="table"><thead><tr><th>Student No.</th><th>Name</th><th>Block</th><th>Email</th><th>Status</th><th></th></tr></thead><tbody>'+rows.map(x=>`<tr><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.section)}</td><td>${esc(x.email||"—")}</td><td>${esc(x.account_status||"Not Registered")}</td><td><button class="btn secondary" style="padding:7px 10px" onclick="viewStudent('${x.id||""}')">VIEW</button></td></tr>`).join("")+'</tbody></table>';
 }
 function viewStudent(id){
-  let x=roster.find(y=>y.id===id);if(!x)return;
+  let x=roster.find(y=>y.id===id);
+  if(!x && id==="") return;
+  if(!x)return;
   $("modalTitle").textContent=x.full_name;
   $("modalBody").innerHTML=`<div class="formgrid">
   <div class="field"><label>STUDENT NUMBER</label><input class="input" value="${esc(x.student_number)}" readonly></div>
