@@ -50,6 +50,11 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
 .instructor-line strong{color:#fff}
 .footer-instructor{margin-top:28px;padding-top:16px;border-top:1px solid #e8eaf2;color:#6b7280;font-size:11px}
 .footer-instructor strong{color:#374151}
+
+.disclaimer{margin-top:22px;padding:13px 15px;border:1px solid #ffffff2e;background:#ffffff12;border-radius:13px;color:#ffffffcc;font-size:10px;line-height:1.55}
+.disclaimer strong{color:#fff}
+.login-disclaimer{margin-top:18px;padding:10px 12px;background:#fef3c7;color:#78350f;border-radius:11px;font-size:10px;line-height:1.5;border:1px solid #fde68a}
+.portal-disclaimer{margin:0 auto 18px;width:min(1240px,92%);padding:10px 14px;background:#fffbeb;border:1px solid #fde68a;color:#78350f;border-radius:12px;font-size:10px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -68,6 +73,7 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
       <p>Securely access your personal information and NSTP grades for Academic Year 2026–2027.</p>
       <div class="school-meta">Literacy Training Service • First &amp; Second Semester • SY 2026–2027</div>
       <div class="instructor-line">Instructor: <strong>Celito Joe M. Perillo</strong></div>
+      <div class="disclaimer"><strong>DISCLAIMER:</strong> This is <strong>NOT an official system of Ligao Community College.</strong> This portal is developed and maintained solely for the instructional and academic use of the instructor.</div>
       <div class="mini">LiComCo • Tomolin, Ligao City, Albay</div>
     </div>
     <div class="form-side">
@@ -82,6 +88,7 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
         <div class="switch">First time here? <button class="link" onclick="showBox('register')">Create Account</button></div>
         <div class="switch"><button class="link" onclick="showBox('forgot')">Forgot Password?</button></div>
         <div class="switch">Administrator? <button class="link" onclick="showBox('admin')">Admin Login</button></div>
+        <div class="login-disclaimer"><strong>Notice:</strong> This is not an official institutional system. It is intended for the instructor's use in managing NSTP student academic records.</div>
       </div>
 
       <div id="registerBox" class="form hidden">
@@ -138,6 +145,7 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
 </div>
     <div class="top-actions"><span id="rolePill" class="pill">STUDENT</span><button class="logout" onclick="logout()">Log Out</button></div>
   </header>
+  <div class="portal-disclaimer"><strong>NOT AN OFFICIAL INSTITUTIONAL SYSTEM:</strong> This portal is for the use of the instructor only and is not an official system, website, or service of Ligao Community College. It is intended solely for instructional and academic record-management purposes.</div>
 
   <div class="shell">
     <aside id="sidebar" class="side"></aside>
@@ -145,7 +153,7 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
       <section id="studentPages">
 
         <div id="sDashboard" class="page active">
-          <div class="welcome"><small>Ligao Community College • NSTP</small><h1>Hello, <span id="dashName">Student</span>! 👋</h1><p>Welcome to your official NSTP academic portal for SY 2026–2027.</p><div class="footer-instructor">Instructor: <strong>Celito Joe M. Perillo</strong></div></div>
+          <div class="welcome"><small>Ligao Community College • NSTP</small><h1>Hello, <span id="dashName">Student</span>! 👋</h1><p>Welcome to your official NSTP academic portal for SY 2026–2027.</p><div class="footer-instructor">Instructor: <strong>Celito Joe M. Perillo</strong><br><span style="font-size:10px">This is not an official institutional system of Ligao Community College. For instructor use only.</span></div></div>
           <div class="grid3">
             <div class="card"><div class="label">Student Number</div><div id="dashNo" class="value">—</div></div>
             <div class="card"><div class="label">Block</div><div id="dashBlock" class="value">—</div></div>
@@ -212,7 +220,7 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
 
       <section id="adminPages" class="hidden">
         <div id="aDashboard" class="page active">
-          <div class="welcome"><small>Administrator</small><h1>LiComCo NSTP Grade Management</h1><p>Manage students and publish NSTP 1 and NSTP 2 grades.</p><div class="footer-instructor">Instructor: <strong>Celito Joe M. Perillo</strong></div></div>
+          <div class="welcome"><small>Administrator</small><h1>LiComCo NSTP Grade Management</h1><p>Manage students and publish NSTP 1 and NSTP 2 grades.</p><div class="footer-instructor">Instructor: <strong>Celito Joe M. Perillo</strong><br><span style="font-size:10px">This is not an official institutional system of Ligao Community College. For instructor use only.</span></div></div>
           <div class="kpis">
             <div class="kpi"><div class="label">TOTAL STUDENTS</div><strong id="kTotal">97</strong></div>
             <div class="kpi"><div class="label">SOCIAL STUDIES A</div><strong>33</strong></div>
