@@ -191,6 +191,15 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
   .topbar .logout{margin-left:auto!important}
 }
 @media(min-width:901px){.mobile-drawer,.mobile-overlay{display:none!important}}
+
+.qr-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-top:18px}
+.qr-admin-card{background:#fff;border:1px solid #e8eaf2;border-radius:18px;padding:16px;text-align:center;box-shadow:0 8px 25px #11110d}
+.qr-admin-card .qr-mini{display:grid;place-items:center;min-height:170px;margin:8px 0}
+.qr-admin-card .qr-mini img{max-width:170px;height:auto}
+.qr-admin-card .qr-name{font-weight:800;font-size:13px;line-height:1.25;color:var(--ink)}
+.qr-admin-card .qr-no{font-weight:800;color:var(--p);font-size:12px;margin-top:5px}
+.qr-admin-card .qr-block{font-size:10px;color:var(--muted);margin-top:4px}
+@media(max-width:520px){.qr-admin-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.qr-admin-card{padding:10px}.qr-admin-card .qr-mini{min-height:145px}.qr-admin-card .qr-mini img{max-width:135px}}
 </style>
 </head>
 <body>
@@ -434,6 +443,18 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
           <div class="card" style="margin-top:18px"><div class="section-title">Existing Blocks</div><div id="blockCards" class="block-grid"></div></div>
         </div>
 
+
+        <div id="aQRCodes" class="page">
+          <div class="welcome"><small>Student Identification</small><h1>Student QR Codes</h1><p>View and print the unique QR code assigned to each student. The QR payload is the student's Student Number.</p></div>
+          <div class="admin-toolbar">
+            <input id="qrStudentSearch" class="input" placeholder="Search student number or name" oninput="renderAdminQRCodes()">
+            <select id="qrBlockFilter" class="select" onchange="renderAdminQRCodes()"><option value="">All Blocks</option></select>
+            <button class="btn secondary" style="width:auto" onclick="loadAdminQRCodes()">REFRESH</button>
+            <button class="btn primary" style="width:auto" onclick="printAllQRCodes()">PRINT VISIBLE QR CODES</button>
+          </div>
+          <div id="adminQRGrid" class="qr-admin-grid"></div>
+        </div>
+
         <div id="aGrades" class="page">
           <div class="welcome"><small>Grade Management</small><h1>Enter & Publish Grades</h1><p>Changes are saved by student and term. Students only see grades marked as published.</p></div>
           <div class="admin-toolbar">
@@ -544,6 +565,7 @@ function renderMobileNav(){
       mbtn("Students","👥","aStudents"),
       mbtn("Blocks & Students","🧩","aBlocks","loadAdminBlocks()"),
       mbtn("Grade Management","📝","aGrades"),
+      mbtn("Student QR Codes","🔳","aQRCodes","loadAdminQRCodes()"),
       mbtn("Learning Materials","📚","aMaterials","loadAdminMaterials()"),
       mbtn("Attendance Scanner","📱","aAttendance","loadAttendancePage()"),
       mbtn("Evaluation Results","📋","aEvaluations","loadEvaluationResults()"),
@@ -576,12 +598,59 @@ function studentSidebar(){
   <button class="navbtn" data-page="sEvaluation" onclick="nav('sEvaluation');loadEvaluation();closeMobileMenu()">📝 Instructor Evaluation</button>
   <button class="navbtn" data-page="sSecurity" onclick="nav('sSecurity');closeMobileMenu()">🔐 Security</button>`;
 }
+
+let adminQRRoster=[];
+async function loadAdminQRCodes(){
+  try{
+    let {data,error}=await sb.from("student_roster").select("*").order("student_number");
+    if(error)throw error;
+    adminQRRoster=(data||[]).map(x=>({student_number:x.student_number,name:x.full_name||x.name||"",block:x.block||x.section||"",course:x.course||""}));
+    let sel=$("qrBlockFilter");
+    if(sel){
+      let blocks=[...new Set(adminQRRoster.map(x=>x.block).filter(Boolean))].sort();
+      sel.innerHTML='<option value="">All Blocks</option>'+blocks.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join("");
+    }
+    renderAdminQRCodes();
+  }catch(e){
+    let box=$("adminQRGrid");if(box)box.innerHTML=`<div class="eval-note">${esc(e.message||"Unable to load student QR codes.")}</div>`;
+  }
+}
+function renderAdminQRCodes(){
+  let box=$("adminQRGrid");if(!box)return;
+  let q=($("qrStudentSearch")?.value||"").toLowerCase().trim();
+  let b=$("qrBlockFilter")?.value||"";
+  let list=adminQRRoster.filter(x=>(!b||x.block===b)&&(!q||x.student_number.toLowerCase().includes(q)||x.name.toLowerCase().includes(q)));
+  box.innerHTML=list.map((x,i)=>`<div class="qr-admin-card">
+    <div class="qr-mini" id="adminQR_${i}"></div>
+    <div class="qr-no">${esc(x.student_number)}</div>
+    <div class="qr-name">${esc(x.name)}</div>
+    <div class="qr-block">${esc(x.block)}</div>
+    <button class="btn secondary" style="width:auto;margin-top:10px" onclick="printOneQR('${encodeURIComponent(x.student_number)}')">PRINT</button>
+  </div>`).join("")||'<div class="eval-note">No students found.</div>';
+  list.forEach((x,i)=>{
+    let el=$("adminQR_"+i);
+    if(el&&typeof QRCode!=="undefined")new QRCode(el,{text:x.student_number,width:160,height:160,colorDark:"#111827",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+  });
+}
+function printOneQR(encoded){
+  let sn=decodeURIComponent(encoded),x=adminQRRoster.find(r=>r.student_number===sn);if(!x)return;
+  let w=window.open("","_blank","width=600,height=700");
+  if(!w)return;
+  w.document.write(`<html><head><title>${esc(x.student_number)} QR</title><style>body{font-family:Arial;text-align:center;padding:35px}img{width:320px;height:320px}h1{font-size:20px}p{color:#555}</style></head><body><h1>NSTP STUDENT QR</h1><div id="q"></div><h2>${esc(x.student_number)}</h2><strong>${esc(x.name)}</strong><p>${esc(x.block)}</p><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><script>new QRCode(document.getElementById('q'),{text:${JSON.stringify(x.student_number)},width:320,height:320});setTimeout(()=>window.print(),500)<\/script></body></html>`);
+  w.document.close();
+}
+function printAllQRCodes(){
+  let cards=[...document.querySelectorAll("#adminQRGrid .qr-admin-card")];
+  if(!cards.length)return toast("No QR codes to print.");
+  window.print();
+}
 function adminSidebar(){
   $("sidebar").innerHTML=`<div class="navtitle">Admin Menu</div>
   <button class="navbtn active" data-page="aDashboard" onclick="nav('aDashboard');closeMobileMenu()">📊 Dashboard</button>
   <button class="navbtn" data-page="aStudents" onclick="nav('aStudents');closeMobileMenu()">👥 Students</button>
   <button class="navbtn" data-page="aBlocks" onclick="nav('aBlocks');loadAdminBlocks();closeMobileMenu()">🧩 Blocks & Students</button>
   <button class="navbtn" data-page="aGrades" onclick="nav('aGrades');closeMobileMenu()">📝 Grade Management</button>
+  <button class="navbtn" data-page="aQRCodes" onclick="nav('aQRCodes');loadAdminQRCodes();closeMobileMenu()">🔳 Student QR Codes</button>
   <button class="navbtn" data-page="aMaterials" onclick="nav('aMaterials');loadAdminMaterials();closeMobileMenu()">📚 Learning Materials</button>
   <button class="navbtn" data-page="aAttendance" onclick="nav('aAttendance');loadAttendancePage();closeMobileMenu()">📱 Attendance Scanner</button>
   <button class="navbtn" data-page="aEvaluations" onclick="nav('aEvaluations');loadEvaluationResults();closeMobileMenu()">📋 Evaluation Results</button>`;
