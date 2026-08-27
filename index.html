@@ -954,11 +954,19 @@ async function onQrScan(decodedText){
       let {data:acct,error:acctErr}=await sb.from("student_profiles").select("user_id,student_number").eq("student_number",qr.student_number).maybeSingle();
       if(!acctErr && acct)qr.student_id=acct.user_id;
     }
-    if(!qr.student_id){$("scanResult").textContent="⚠️ Student is not registered yet";$("scanSub").textContent=qr.full_name+" • "+qr.student_number;return}
+    // Registration is NOT required for attendance. The official roster is enough.
+    // If there is no registered account, keep student_id null and record the scan
+    // using the Student Number/name/block from the roster.
     let {error:ins}=await sb.from("attendance_records").insert({
-      session_id:activeAttendanceSession.id,student_id:qr.student_id,student_number:qr.student_number,
-      full_name:qr.full_name,block:qr.block,attendance_date:new Date().toISOString().slice(0,10),
-      status:"Present",scanned_at:new Date().toISOString(),scanned_by:currentUser.id
+      session_id:activeAttendanceSession.id,
+      student_id:qr.student_id || null,
+      student_number:qr.student_number,
+      full_name:qr.full_name,
+      block:qr.block,
+      attendance_date:new Date().toISOString().slice(0,10),
+      status:"Present",
+      scanned_at:new Date().toISOString(),
+      scanned_by:currentUser.id
     });
     if(ins){
       if(ins.code==="23505"){$("scanResult").textContent="⚠️ Already Recorded";$("scanSub").textContent=qr.full_name+" • "+qr.student_number;}
