@@ -954,10 +954,9 @@ async function onQrScan(decodedText){
       let {data:acct,error:acctErr}=await sb.from("student_profiles").select("user_id,student_number").eq("student_number",qr.student_number).maybeSingle();
       if(!acctErr && acct)qr.student_id=acct.user_id;
     }
-    // Registration is NOT required for attendance. The official roster is enough.
-    // If there is no registered account, keep student_id null and record the scan
-    // using the Student Number/name/block from the roster.
-    let {error:ins}=await sb.from("attendance_records").insert({
+    // Registration is NOT required. Record against the official roster using
+    // nstp_attendance_scans, where student_id is intentionally nullable.
+    let {error:ins}=await sb.from("nstp_attendance_scans").insert({
       session_id:activeAttendanceSession.id,
       student_id:qr.student_id || null,
       student_number:qr.student_number,
@@ -974,9 +973,9 @@ async function onQrScan(decodedText){
     }else{
       $("scanResult").textContent="✅ PRESENT";$("scanSub").textContent=qr.full_name+" • "+qr.student_number;await loadSessionAttendance()
     }
-  }catch(e){console.error(e);$("scanResult").textContent="❌ Scan could not be recorded";$("scanSub").textContent=e.message||"Please try again."}
+  }catch(e){console.error(e);$("scanResult").textContent="❌ Scan could not be recorded";$("scanSub").textContent=(e?.message||"Please try again.")+" If this is the first use, run the Attendance SQL setup.";toast(e?.message||"Attendance could not be recorded.");}
 }
-async function loadSessionAttendance(){let box=$("attendanceSessionTable");if(!box||!activeAttendanceSession)return;try{let {data,error}=await sb.from("attendance_records").select("student_number,full_name,block,scanned_at,status").eq("session_id",activeAttendanceSession.id).order("scanned_at");if(error)throw error;box.innerHTML=data?.length?'<table class="table"><thead><tr><th>#</th><th>Student No.</th><th>Name</th><th>Block</th><th>Time Scanned</th><th>Status</th></tr></thead><tbody>'+data.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.block)}</td><td>${new Date(x.scanned_at).toLocaleTimeString()}</td><td><span class="status">${esc(x.status)}</span></td></tr>`).join('')+'</tbody></table>':'<div class="empty">No students scanned yet.</div>'}catch(e){console.error(e)}}
+async function loadSessionAttendance(){let box=$("attendanceSessionTable");if(!box||!activeAttendanceSession)return;try{let {data,error}=await sb.from("nstp_attendance_scans").select("student_number,full_name,block,scanned_at,status").eq("session_id",activeAttendanceSession.id).order("scanned_at");if(error)throw error;box.innerHTML=data?.length?'<table class="table"><thead><tr><th>#</th><th>Student No.</th><th>Name</th><th>Block</th><th>Time Scanned</th><th>Status</th></tr></thead><tbody>'+data.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.block)}</td><td>${new Date(x.scanned_at).toLocaleTimeString()}</td><td><span class="status">${esc(x.status)}</span></td></tr>`).join('')+'</tbody></table>':'<div class="empty">No students scanned yet.</div>'}catch(e){console.error(e)}}
 
 async function loadAdminBlocks(){
   let cards=$("blockCards"),sel=$("newStudentBlock");if(!cards)return;
