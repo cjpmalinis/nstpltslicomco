@@ -922,7 +922,52 @@ async function endAttendance(){if(!activeAttendanceSession)return;if(!confirm("E
 function startScanner(){if(attendanceScanner||!activeAttendanceSession)return;attendanceScanner=new Html5Qrcode("qrReader");attendanceScanner.start({facingMode:"environment"},{fps:10,qrbox:{width:240,height:240}},onQrScan,()=>{}).catch(e=>{attendanceScanner=null;setMsg("attendanceMsg","Camera could not start. Allow camera access and use HTTPS (GitHub Pages).")})}
 function stopScanner(){if(attendanceScanner){attendanceScanner.stop().then(()=>{attendanceScanner.clear();attendanceScanner=null}).catch(()=>{attendanceScanner=null})}}
 let lastScanToken="",lastScanAt=0;
-async function onQrScan(decodedText){let now=Date.now();if(decodedText===lastScanToken&&now-lastScanAt<3000)return;lastScanToken=decodedText;lastScanAt=now;try{let {data:qr,error}=await sb.from("student_qr_codes").select("student_id,student_number,full_name,block").eq("token",decodedText).maybeSingle();if(error)throw error;if(!qr){$("scanResult").textContent="❌ QR code not recognized";return}let {error:ins}=await sb.from("attendance_records").insert({session_id:activeAttendanceSession.id,student_id:qr.student_id,attendance_date:new Date().toISOString().slice(0,10),status:"Present",scanned_at:new Date().toISOString(),scanned_by:currentUser.id});if(ins){if(ins.code==="23505"){$("scanResult").textContent="⚠️ Already Recorded";$("scanSub").textContent=qr.full_name;}else throw ins}else{$("scanResult").textContent="✅ PRESENT";$("scanSub").textContent=qr.full_name+" • "+qr.student_number;await loadSessionAttendance()}}catch(e){console.error(e);$("scanResult").textContent="❌ Scan could not be recorded"}}
+async function onQrScan(decodedText){
+  let now=Date.now(); decodedText=(decodedText||"").trim();
+  if(decodedText===lastScanToken&&now-lastScanAt<3000)return;
+  lastScanToken=decodedText;lastScanAt=now;
+  try{
+    if(!activeAttendanceSession){$("scanResult").textContent="⚠️ Start attendance first.";return}
+    let qr=null;
+    // Accept the printed QR codes: their payload is the Student Number.
+    let {data:byNo,error:noErr}=await sb.from("student_qr_codes").select("student_id,student_number,full_name,block").eq("student_number",decodedText).maybeSingle();
+    if(noErr)throw noErr;
+    qr=byNo;
+    // Also accept the account-generated token QR.
+    if(!qr){
+      let {data:byToken,error:tokErr}=await sb.from("student_qr_codes").select("student_id,student_number,full_name,block").eq("token",decodedText).maybeSingle();
+      if(tokErr)throw tokErr; qr=byToken;
+    }
+    // Final fallback: identify the student directly from the official roster.
+    if(!qr && /^2026-LTS-[0-9]{3}$/.test(decodedText)){
+      let {data:r,error:rosterErr}=await sb.from("student_roster").select("student_number,full_name,block,course").eq("student_number",decodedText).maybeSingle();
+      if(rosterErr)throw rosterErr;
+      if(r)qr={student_number:r.student_number,full_name:r.full_name,block:r.block};
+    }
+    if(!qr){$("scanResult").textContent="❌ QR code not recognized";$("scanSub").textContent=decodedText;return}
+    // Do not allow a student to be marked present in the wrong class block.
+    if(qr.block && activeAttendanceSession.block && qr.block!==activeAttendanceSession.block){
+      $("scanResult").textContent="⚠️ WRONG BLOCK";$("scanSub").textContent=qr.full_name+" • "+qr.block;return
+    }
+    // If the roster fallback has no student_id, find the account by roster/student number.
+    if(!qr.student_id){
+      let {data:acct,error:acctErr}=await sb.from("student_profiles").select("user_id,student_number").eq("student_number",qr.student_number).maybeSingle();
+      if(!acctErr && acct)qr.student_id=acct.user_id;
+    }
+    if(!qr.student_id){$("scanResult").textContent="⚠️ Student is not registered yet";$("scanSub").textContent=qr.full_name+" • "+qr.student_number;return}
+    let {error:ins}=await sb.from("attendance_records").insert({
+      session_id:activeAttendanceSession.id,student_id:qr.student_id,student_number:qr.student_number,
+      full_name:qr.full_name,block:qr.block,attendance_date:new Date().toISOString().slice(0,10),
+      status:"Present",scanned_at:new Date().toISOString(),scanned_by:currentUser.id
+    });
+    if(ins){
+      if(ins.code==="23505"){$("scanResult").textContent="⚠️ Already Recorded";$("scanSub").textContent=qr.full_name+" • "+qr.student_number;}
+      else throw ins
+    }else{
+      $("scanResult").textContent="✅ PRESENT";$("scanSub").textContent=qr.full_name+" • "+qr.student_number;await loadSessionAttendance()
+    }
+  }catch(e){console.error(e);$("scanResult").textContent="❌ Scan could not be recorded";$("scanSub").textContent=e.message||"Please try again."}
+}
 async function loadSessionAttendance(){let box=$("attendanceSessionTable");if(!box||!activeAttendanceSession)return;try{let {data,error}=await sb.from("attendance_records").select("student_number,full_name,block,scanned_at,status").eq("session_id",activeAttendanceSession.id).order("scanned_at");if(error)throw error;box.innerHTML=data?.length?'<table class="table"><thead><tr><th>#</th><th>Student No.</th><th>Name</th><th>Block</th><th>Time Scanned</th><th>Status</th></tr></thead><tbody>'+data.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.block)}</td><td>${new Date(x.scanned_at).toLocaleTimeString()}</td><td><span class="status">${esc(x.status)}</span></td></tr>`).join('')+'</tbody></table>':'<div class="empty">No students scanned yet.</div>'}catch(e){console.error(e)}}
 
 async function loadAdminBlocks(){
