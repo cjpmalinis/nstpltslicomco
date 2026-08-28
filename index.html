@@ -200,6 +200,8 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
 .qr-admin-card .qr-no{font-weight:800;color:var(--p);font-size:12px;margin-top:5px}
 .qr-admin-card .qr-block{font-size:10px;color:var(--muted);margin-top:4px}
 @media(max-width:520px){.qr-admin-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.qr-admin-card{padding:10px}.qr-admin-card .qr-mini{min-height:145px}.qr-admin-card .qr-mini img{max-width:135px}}
+
+.att-filter-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}.att-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:15px 0}.att-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:15px}.att-day{background:#fff;border:1px solid #e8eaf2;border-radius:12px;padding:10px;min-height:72px}.att-day.present{background:#ecfdf5;border-color:#a7f3d0}.att-day .date{font-size:11px;font-weight:800}.att-day .statusx{font-size:10px;color:#047857;margin-top:6px;font-weight:800}@media(max-width:700px){.att-filter-grid,.att-summary{grid-template-columns:1fr 1fr}.att-calendar{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -371,7 +373,9 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
           </div>
         </div>
         <div id="sAttendanceHistory" class="page">
-          <div class="welcome"><small>Attendance Records</small><h1>My Attendance</h1><p>Attendance records are based on successful QR scans by the instructor.</p></div>
+          <div class="welcome"><small>Attendance Records</small><h1>My Attendance</h1><p>See the days you were marked present by your instructor.</p></div>
+          <div class="att-summary"><div class="kpi"><div class="label">PRESENT</div><strong id="myPresentCount">0</strong></div><div class="kpi"><div class="label">CLASS DAYS</div><strong id="myClassDays">0</strong></div></div>
+          <div class="card"><div class="section-title">Days Present</div><div id="myAttendanceCalendar" class="att-calendar"></div></div>
           <div id="myAttendanceTable" class="admin-table-wrap" style="margin-top:20px"></div>
         </div>
 
@@ -489,7 +493,8 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
           <div class="card" style="margin-top:18px"><div class="section-title">Current Session Attendance</div><div id="attendanceSessionTable" class="attendance-table"></div></div>
         </div>
 
-<div id="aMaterials" class="page">
+<div id="aAttendanceHistory" class="page"><div class="welcome"><small>Attendance Records</small><h1>Attendance Management</h1><p>View and filter attendance records for all classes and students.</p></div><div class="att-filter-grid"><input id="attSearch" class="input" placeholder="Search student no. or name" oninput="renderAdminAttendance()"><select id="attBlockFilter" class="select" onchange="renderAdminAttendance()"><option value="">All Blocks</option></select><input id="attDateFilter" class="input" type="date" onchange="renderAdminAttendance()"><button class="btn secondary" onclick="loadAdminAttendanceHistory()">REFRESH</button></div><div class="att-summary"><div class="kpi"><div class="label">PRESENT SCANS</div><strong id="attTotalPresent">0</strong></div><div class="kpi"><div class="label">STUDENTS</div><strong id="attTotalStudents">0</strong></div><div class="kpi"><div class="label">CLASS DAYS</div><strong id="attClassDays">0</strong></div><div class="kpi"><div class="label">FILTERED RECORDS</div><strong id="attFiltered">0</strong></div></div><button class="btn primary" style="width:auto;margin-bottom:15px" onclick="exportAttendanceCSV()">EXPORT CSV</button><div id="adminAttendanceTable" class="admin-table-wrap"></div></div>
+        <div id="aMaterials" class="page">
           <div class="welcome"><small>Instructor Resources</small><h1>Learning Materials</h1><p>Upload, organize, and publish NSTP learning resources for your students.</p></div>
           <div class="card" style="margin-bottom:18px">
             <div class="section-title">Upload New Material</div>
@@ -912,7 +917,16 @@ async function loadStudentQR(){
 }
 async function loadMyAttendance(){
   let box=$("myAttendanceTable");if(!box)return;
-  try{let {data,error}=await sb.from("attendance_records").select("attendance_date,scanned_at,status,attendance_sessions!inner(block)").eq("student_id",currentUser.id).order("attendance_date",{ascending:false}).order("scanned_at",{ascending:false});if(error)throw error;if(!data?.length){box.innerHTML='<div class="empty">No attendance records yet.</div>';return}box.innerHTML='<table class="table"><thead><tr><th>Date</th><th>Class</th><th>Scan Time</th><th>Status</th></tr></thead><tbody>'+data.map(x=>`<tr><td>${esc(x.attendance_date)}</td><td>${esc(x.attendance_sessions?.block||" ")}</td><td>${new Date(x.scanned_at).toLocaleString()}</td><td><span class="status">${esc(x.status)}</span></td></tr>`).join('')+'</tbody></table>';}catch(e){box.innerHTML='<div class="empty">Attendance records could not be loaded.</div>'}
+  try{
+    let {data,error}=await sb.from("nstp_attendance_scans").select("attendance_date,scanned_at,status,block").eq("student_number",currentProfile.student_number).order("attendance_date",{ascending:false}).order("scanned_at",{ascending:false});
+    if(error)throw error; data=data||[];
+    let present=data.filter(x=>String(x.status).toLowerCase()==="present");
+    $("myPresentCount").textContent=present.length;
+    $("myClassDays").textContent=new Set(data.map(x=>x.attendance_date)).size;
+    $("myAttendanceCalendar").innerHTML=present.length?present.map(x=>`<div class="att-day present"><div class="date">${new Date(x.attendance_date+"T00:00:00").toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"})}</div><div class="statusx">✓ PRESENT</div><div style="font-size:9px;color:#6b7280;margin-top:3px">${esc(x.block||"NSTP")}</div></div>`).join(""):'<div class="empty" style="grid-column:1/-1">No days present yet.</div>';
+    if(!data.length){box.innerHTML='<div class="empty">No attendance records yet.</div>';return}
+    box.innerHTML='<table class="table"><thead><tr><th>Date</th><th>Class</th><th>Scan Time</th><th>Status</th></tr></thead><tbody>'+data.map(x=>`<tr><td>${esc(x.attendance_date)}</td><td>${esc(x.block||"")}</td><td>${new Date(x.scanned_at).toLocaleString()}</td><td><span class="status">${esc(x.status)}</span></td></tr>`).join("")+'</tbody></table>';
+  }catch(e){console.error(e);box.innerHTML='<div class="empty">Attendance records could not be loaded.</div>'}
 }
 async function loadAttendancePage(){let block=todayClass();$("attendanceDay").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"});$("attendanceBlock").textContent=block;if(block!=="No scheduled NSTP class")$("attendanceBlockSelect").value=block;await findActiveAttendanceSession();}
 async function findActiveAttendanceSession(){try{let date=new Date().toISOString().slice(0,10);let {data,error}=await sb.from("attendance_sessions").select("*").eq("attendance_date",date).eq("active",true).maybeSingle();if(error&&error.code!=="PGRST116")throw error;activeAttendanceSession=data||null;updateAttendanceUI();if(data){await loadSessionAttendance();startScanner();}}catch(e){console.error(e)}}
@@ -977,6 +991,32 @@ async function onQrScan(decodedText){
 }
 async function loadSessionAttendance(){let box=$("attendanceSessionTable");if(!box||!activeAttendanceSession)return;try{let {data,error}=await sb.from("nstp_attendance_scans").select("student_number,full_name,block,scanned_at,status").eq("session_id",activeAttendanceSession.id).order("scanned_at");if(error)throw error;box.innerHTML=data?.length?'<table class="table"><thead><tr><th>#</th><th>Student No.</th><th>Name</th><th>Block</th><th>Time Scanned</th><th>Status</th></tr></thead><tbody>'+data.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.block)}</td><td>${new Date(x.scanned_at).toLocaleTimeString()}</td><td><span class="status">${esc(x.status)}</span></td></tr>`).join('')+'</tbody></table>':'<div class="empty">No students scanned yet.</div>'}catch(e){console.error(e)}}
 
+let adminAttendanceData=[];
+async function loadAdminAttendanceHistory(){
+  try{
+    let {data,error}=await sb.from("nstp_attendance_scans").select("attendance_date,student_number,full_name,block,scanned_at,status").order("attendance_date",{ascending:false}).order("scanned_at",{ascending:false});
+    if(error)throw error; adminAttendanceData=data||[];
+    let sel=$("attBlockFilter"),blocks=[...new Set(adminAttendanceData.map(x=>x.block).filter(Boolean))].sort();
+    sel.innerHTML='<option value="">All Blocks</option>'+blocks.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join("");
+    renderAdminAttendance();
+  }catch(e){$("adminAttendanceTable").innerHTML=`<div class="empty">${esc(e.message||"Attendance records could not be loaded.")}</div>`}
+}
+function renderAdminAttendance(){
+  let q=($("attSearch").value||"").toLowerCase().trim(),b=$("attBlockFilter").value,d=$("attDateFilter").value;
+  let list=adminAttendanceData.filter(x=>(!q||String(x.student_number).toLowerCase().includes(q)||String(x.full_name).toLowerCase().includes(q))&&(!b||x.block===b)&&(!d||x.attendance_date===d));
+  $("attTotalPresent").textContent=list.filter(x=>String(x.status).toLowerCase()==="present").length;
+  $("attTotalStudents").textContent=new Set(list.map(x=>x.student_number)).size;
+  $("attClassDays").textContent=new Set(list.map(x=>x.attendance_date)).size;
+  $("attFiltered").textContent=list.length;
+  $("adminAttendanceTable").innerHTML=list.length?'<table class="table"><thead><tr><th>#</th><th>Date</th><th>Student No.</th><th>Name</th><th>Block</th><th>Scan Time</th><th>Status</th></tr></thead><tbody>'+list.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.attendance_date)}</td><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.block)}</td><td>${new Date(x.scanned_at).toLocaleTimeString()}</td><td><span class="status">${esc(x.status)}</span></td></tr>`).join("")+'</tbody></table>':'<div class="empty">No attendance records match the filters.</div>';
+}
+function exportAttendanceCSV(){
+  let q=($("attSearch").value||"").toLowerCase().trim(),b=$("attBlockFilter").value,d=$("attDateFilter").value;
+  let list=adminAttendanceData.filter(x=>(!q||String(x.student_number).toLowerCase().includes(q)||String(x.full_name).toLowerCase().includes(q))&&(!b||x.block===b)&&(!d||x.attendance_date===d));
+  if(!list.length)return toast("No attendance records to export.");
+  let csv="Date,Student Number,Name,Block,Scan Time,Status\n"+list.map(x=>[x.attendance_date,x.student_number,x.full_name,x.block,new Date(x.scanned_at).toLocaleString(),x.status].map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");
+  let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="NSTP_Attendance.csv";a.click();
+}
 async function loadAdminBlocks(){
   let cards=$("blockCards"),sel=$("newStudentBlock");if(!cards)return;
   try{
