@@ -269,7 +269,7 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
 
 
         
-        <div id="sAttendanceQR" class="page"><div class="welcome"><small>My Attendance</small><h1>My Attendance QR</h1><p>Show this unique QR to your instructor.</p></div><div id="studentQRArea" class="card" style="text-align:center"></div></div><div id="sAttendance" class="page"><div class="welcome"><small>My Attendance</small><h1>Attendance History</h1><p>Your attendance records.</p></div><div id="studentAttendanceArea" class="card"></div></div><div id="sMaterials" class="page">
+        <div id="sMaterials" class="page">
           <div class="welcome"><small>Learning Resources</small><h1>Learning Materials</h1><p>Access materials uploaded and published by your NSTP instructor.</p></div>
           <div id="studentMaterials" class="material-grid"></div>
         </div>
@@ -483,7 +483,7 @@ function renderMobileNav(){
       mbtn("Personal Information","👤","sPersonal"),
       mbtn("Learning Materials","📖","sMaterials","loadStudentMaterials()"),
       mbtn("My Attendance QR","📱","sAttendanceQR","loadStudentQR()"),
-      mbtn("My Attendance","📊","sAttendance","loadStudentAttendance()"),
+      mbtn("My Attendance","📊","sAttendanceHistory","loadMyAttendance()"),
       mbtn("Grades","📚","sGrades","loadStudentGrades()"),
       mbtn("Instructor Evaluation","📝","sEvaluation","loadEvaluation()"),
       '<div class="mobile-divider"></div>',
@@ -497,7 +497,7 @@ function studentSidebar(){
   <button class="navbtn" data-page="sPersonal" onclick="nav('sPersonal');closeMobileMenu()">👤 Personal Information</button>
   <button class="navbtn" data-page="sGrades" onclick="nav('sGrades');loadStudentGrades();closeMobileMenu()">📚 Grades</button>
   <button class="navbtn" data-page="sMaterials" onclick="nav('sMaterials');loadStudentMaterials();closeMobileMenu()">📖 Learning Materials</button>
-  <button class="navbtn" data-page="sAttendance" onclick="nav('sAttendance');loadStudentQR();closeMobileMenu()">📱 My Attendance QR</button>
+  <button class="navbtn" data-page="sAttendanceQR" onclick="nav('sAttendanceQR');loadStudentQR();closeMobileMenu()">📱 My Attendance QR</button>
   <button class="navbtn" data-page="sAttendanceHistory" onclick="nav('sAttendanceHistory');loadMyAttendance();closeMobileMenu()">📊 My Attendance</button>
   <button class="navbtn" data-page="sEvaluation" onclick="nav('sEvaluation');loadEvaluation();closeMobileMenu()">📝 Instructor Evaluation</button>
   <button class="navbtn" data-page="sSecurity" onclick="nav('sSecurity');closeMobileMenu()">🔐 Security</button>`;
@@ -735,13 +735,39 @@ async function loadStudentMaterials(){
 }
 async function openMaterial(id){
   try{
-    let {data:m,error}=await sb.from("learning_materials").select("file_path,file_name").eq("id",id).single();
+    showLoader(true);
+    let {data:m,error}=await sb.from("learning_materials")
+      .select("file_path,file_name,title,material_type")
+      .eq("id",id).single();
     if(error)throw error;
-    let {data,error:err}=await sb.storage.from(MATERIAL_BUCKET).createSignedUrl(m.file_path,300);
+
+    let {data:signed,error:err}=await sb.storage.from(MATERIAL_BUCKET).createSignedUrl(m.file_path,600);
     if(err)throw err;
-    window.open(data.signedUrl,"_blank","noopener");
-  }catch(e){toast(e.message||"Unable to open this material.")}
+    if(!signed?.signedUrl)throw new Error("Supabase did not return a file URL.");
+
+    $("materialViewerTitle").textContent=m.title||"Learning Material";
+    $("materialViewerFile").textContent=m.file_name||"";
+    $("materialDownloadLink").href=signed.signedUrl;
+
+    let body=$("materialViewerBody"), lower=(m.file_name||"").toLowerCase();
+    if(lower.endsWith(".pdf")){
+      body.innerHTML=`<iframe src="${signed.signedUrl}" style="width:100%;height:100%;border:0;background:#fff" title="${esc(m.title||"Learning Material")}"></iframe>`;
+    }else if(/\.(jpg|jpeg|png|gif|webp)$/i.test(lower)){
+      body.innerHTML=`<div style="height:100%;display:flex;align-items:center;justify-content:center;padding:20px"><img src="${signed.signedUrl}" style="max-width:100%;max-height:100%;object-fit:contain" alt="${esc(m.title||"Learning Material")}"></div>`;
+    }else{
+      body.innerHTML=`<div style="padding:40px;text-align:center;max-width:650px;margin:auto"><div style="font-size:48px">📎</div><h3>${esc(m.title||"Learning Material")}</h3><p style="color:#6b7280">This file type may not preview directly in the browser. Tap DOWNLOAD above to save or open it.</p></div>`;
+    }
+    $("materialViewerModal").style.display="flex";
+  }catch(e){
+    console.error(e);
+    toast((e?.message||"Unable to open this material.")+" Check the NSTP learning-material Storage policies.");
+  }finally{showLoader(false)}
 }
+function closeMaterialViewer(){
+  if($("materialViewerModal"))$("materialViewerModal").style.display="none";
+  if($("materialViewerBody"))$("materialViewerBody").innerHTML="";
+}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMaterialViewer();});
 async function toggleMaterial(id,publish){
   try{
     let {error}=await sb.from("learning_materials").update({published:publish,updated_at:new Date().toISOString()}).eq("id",id);
@@ -765,8 +791,21 @@ const CLASS_SCHEDULE={1:"BSED 1 Social Studies A",2:"BECED 1-A",4:"BSED 1 Math"}
 function todayClass(){return CLASS_SCHEDULE[new Date().getDay()]||"No scheduled NSTP class";}
 async function loadStudentQR(){
   let box=$("studentQR");if(!box)return;showLoader(true);
-  try{let {data,error}=await sb.rpc("get_or_create_my_attendance_qr");if(error)throw error;box.innerHTML="";new QRCode(box,{text:data.token,width:230,height:230,colorDark:"#111827",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});$("studentQRName").textContent=currentProfile.full_name;$("studentQRNo").textContent=currentProfile.student_number+" • "+currentProfile.section;}
-  catch(e){console.error(e);box.innerHTML='<div class="eval-note">QR could not be generated. Please run the Attendance SQL setup.</div>'}finally{showLoader(false)}
+  try{
+    const {data,error}=await sb.rpc("get_or_create_my_attendance_qr");
+    if(error)throw error;
+    // Supabase returns RETURNS TABLE results as an array. Accept both array/object
+    // formats so the QR works regardless of the RPC response shape.
+    const qr=Array.isArray(data)?data[0]:data;
+    if(!qr?.token)throw new Error("QR token was not returned. Please run the Attendance SQL setup.");
+    box.innerHTML="";
+    new QRCode(box,{text:String(qr.token),width:230,height:230,colorDark:"#111827",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+    $("studentQRName").textContent=qr.full_name||currentProfile?.full_name||"";
+    $("studentQRNo").textContent=(qr.student_number||currentProfile?.student_number||"")+" • "+(qr.block||currentProfile?.section||"");
+  }catch(e){
+    console.error("Student QR error:",e);
+    box.innerHTML='<div class="eval-note">QR could not be generated.<br><small>'+esc(e?.message||"Please run the Attendance SQL setup.")+'</small></div>';
+  }finally{showLoader(false)}
 }
 async function loadMyAttendance(){
   let box=$("myAttendanceTable");if(!box)return;
@@ -1184,5 +1223,18 @@ $("regStudent").addEventListener("blur",()=>{if(validSN($("regStudent").value))l
 $("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
 checkSession();
 </script>
+
+<div id="materialViewerModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.72);z-index:9999;padding:18px;">
+  <div style="background:#fff;border-radius:18px;width:min(1100px,100%);height:min(92vh,900px);margin:auto;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="padding:14px 16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div><div id="materialViewerTitle" style="font-weight:800;font-size:16px"></div><div id="materialViewerFile" style="font-size:11px;color:#6b7280;margin-top:3px"></div></div>
+      <div style="display:flex;gap:8px">
+        <a id="materialDownloadLink" class="btn primary" style="width:auto;text-decoration:none" target="_blank" rel="noopener">DOWNLOAD</a>
+        <button class="btn secondary" style="width:auto" onclick="closeMaterialViewer()">CLOSE</button>
+      </div>
+    </div>
+    <div id="materialViewerBody" style="flex:1;background:#f3f4f6;overflow:auto"></div>
+  </div>
+</div>
 </body>
 </html>
