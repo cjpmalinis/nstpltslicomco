@@ -94,114 +94,26 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
 .block-card{background:#fff;border:1px solid #e8eaf2;border-radius:18px;padding:18px}
 .block-card h3{margin:0 0 6px;font-size:15px}.block-count{font-size:11px;color:#6b7280}
 
-/* ===== FINAL RESPONSIVE MOBILE NAVIGATION ===== */
-.mobile-menu-btn{
-  position:fixed!important;
-  left:14px!important;
-  top:12px!important;
-  right:auto!important;
-  z-index:2147483647!important;
-  display:none!important;
-  width:auto!important;
-  min-width:104px!important;
-  height:44px!important;
-  padding:0 15px!important;
-  border:1px solid #e5e7eb!important;
-  background:#ffffff!important;
-  color:#172033!important;
-  border-radius:12px!important;
-  font:800 13px Poppins,Arial,sans-serif!important;
-  cursor:pointer!important;
-  box-shadow:0 7px 22px #1113!important;
-}
-.mobile-overlay{
-  display:none;
-  position:fixed!important;
-  inset:0!important;
-  background:#11182788!important;
-  z-index:2147483640!important;
-}
-.mobile-overlay.open{display:block!important}
-.mobile-drawer{
-  display:none!important;
-  position:fixed!important;
-  left:0!important;
-  top:0!important;
-  bottom:0!important;
-  width:min(330px,88vw)!important;
-  height:100vh!important;
-  margin:0!important;
-  padding:18px 14px 24px!important;
-  background:#fff!important;
-  z-index:2147483646!important;
-  overflow-y:auto!important;
-  box-shadow:18px 0 45px #1114!important;
-}
+/* Responsive mobile navigation */
+.mobile-menu-btn{position:fixed;right:14px;top:12px;z-index:2147483000;display:none;border:1px solid var(--line);background:#fff;border-radius:12px;width:44px;height:44px;font-size:22px;cursor:pointer;box-shadow:0 6px 18px #1112}
+.mobile-overlay{display:none;position:fixed;inset:0;background:#11182766;z-index:9998}
+.mobile-drawer{display:none!important;position:fixed!important;top:0!important;left:0!important;bottom:0!important;width:min(320px,88vw)!important;background:#fff!important;z-index:9999!important;box-shadow:16px 0 40px #1113!important;overflow-y:auto!important;padding:18px 14px!important}
 .mobile-drawer.open{display:block!important}
-.mobile-head{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  padding:8px 4px 16px!important;
-  margin-bottom:10px!important;
-  border-bottom:1px solid #e8eaf2!important;
-}
-.mobile-head strong{font-size:15px!important;color:#172033!important}
-.mobile-close{
-  border:0!important;
-  background:#f3f4f6!important;
-  color:#172033!important;
-  border-radius:10px!important;
-  padding:8px 11px!important;
-  font-size:18px!important;
-  cursor:pointer!important;
-}
-.mobile-nav{
-  display:flex!important;
-  flex-direction:column!important;
-  gap:4px!important;
-}
-.mobile-nav button{
-  display:block!important;
-  visibility:visible!important;
-  opacity:1!important;
-  width:100%!important;
-  min-height:46px!important;
-  border:0!important;
-  background:#fff!important;
-  color:#374151!important;
-  text-align:left!important;
-  padding:13px 12px!important;
-  border-radius:12px!important;
-  font:700 13px Poppins,Arial,sans-serif!important;
-  cursor:pointer!important;
-}
-.mobile-nav button:hover,.mobile-nav button.active{
-  background:#fdf1f2!important;
-  color:#8f1020!important;
-}
-.mobile-divider{height:1px;background:#e8eaf2;margin:10px 4px!important}
-
+.mobile-nav{display:flex!important;flex-direction:column!important;gap:4px!important}
+.mobile-nav button{display:block!important;width:100%!important;border:0!important;background:transparent!important;text-align:left!important;padding:14px 12px!important;border-radius:12px!important;font-weight:700!important;color:#374151!important;cursor:pointer!important;font-size:14px!important}
 @media(max-width:900px){
-  .mobile-menu-btn{display:block!important}
-  #sidebar.side{display:none!important}
+  .mobile-menu-btn{display:grid;place-items:center}
+  #sidebar.side{display:block!important;position:fixed!important;left:0!important;top:0!important;bottom:0!important;width:min(310px,86vw)!important;height:100vh!important;z-index:10000!important;background:#fff!important;padding:70px 12px 20px!important;overflow-y:auto!important;transform:translateX(-105%);transition:transform .25s ease!important;box-shadow:16px 0 40px #1113!important}
+  #sidebar.side.mobile-open{transform:translateX(0)}
+  #sidebar .navtitle{display:block!important;padding:10px 12px 8px}
+  #sidebar .navbtn{display:block!important;width:100%!important;white-space:normal!important;text-align:left!important;padding:13px 12px!important;margin:3px 0!important;border-radius:12px!important}
+  .mobile-overlay.open{display:block}
   .shell{display:block!important;width:94%!important;margin-top:18px!important}
   .main{width:100%!important}
-  .topbar{padding-left:130px!important;padding-right:3%!important}
-  .topbar .logout{margin-left:auto!important}
+  .topbar{padding:0 3%!important}
+  .welcome h1{font-size:27px!important}
 }
 @media(min-width:901px){.mobile-drawer,.mobile-overlay{display:none!important}}
-
-.qr-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-top:18px}
-.qr-admin-card{background:#fff;border:1px solid #e8eaf2;border-radius:18px;padding:16px;text-align:center;box-shadow:0 8px 25px #11110d}
-.qr-admin-card .qr-mini{display:grid;place-items:center;min-height:170px;margin:8px 0}
-.qr-admin-card .qr-mini img{max-width:170px;height:auto}
-.qr-admin-card .qr-name{font-weight:800;font-size:13px;line-height:1.25;color:var(--ink)}
-.qr-admin-card .qr-no{font-weight:800;color:var(--p);font-size:12px;margin-top:5px}
-.qr-admin-card .qr-block{font-size:10px;color:var(--muted);margin-top:4px}
-@media(max-width:520px){.qr-admin-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.qr-admin-card{padding:10px}.qr-admin-card .qr-mini{min-height:145px}.qr-admin-card .qr-mini img{max-width:135px}}
-
-.att-filter-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}.att-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:15px 0}.att-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:15px}.att-day{background:#fff;border:1px solid #e8eaf2;border-radius:12px;padding:10px;min-height:72px}.att-day.present{background:#ecfdf5;border-color:#a7f3d0}.att-day .date{font-size:11px;font-weight:800}.att-day .statusx{font-size:10px;color:#047857;margin-top:6px;font-weight:800}@media(max-width:700px){.att-filter-grid,.att-summary{grid-template-columns:1fr 1fr}.att-calendar{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -294,7 +206,7 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
   </header>
   <div class="portal-disclaimer"><strong>NOT AN OFFICIAL INSTITUTIONAL SYSTEM:</strong> This portal is for the use of the instructor only and is not an official system, website, or service of Ligao Community College. It is intended solely for instructional and academic record-management purposes.</div>
 
-  <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="Open complete menu" title="Open complete menu" onclick="openMobileMenu()">☰ MENU</button>
+  <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="Open complete menu" title="Open complete menu" onclick="openMobileMenu()">☰</button>
 <div id="mobileOverlay" class="mobile-overlay" onclick="closeMobileMenu()"></div>
 <aside id="mobileDrawer" class="mobile-drawer"><div class="mobile-head"><strong id="mobileMenuTitle">MENU</strong><button class="mobile-close" onclick="closeMobileMenu()">✕</button></div><div id="mobileNav" class="mobile-nav"></div></aside>
 <div class="shell">
@@ -373,9 +285,7 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
           </div>
         </div>
         <div id="sAttendanceHistory" class="page">
-          <div class="welcome"><small>Attendance Records</small><h1>My Attendance</h1><p>See the days you were marked present by your instructor.</p></div>
-          <div class="att-summary"><div class="kpi"><div class="label">PRESENT</div><strong id="myPresentCount">0</strong></div><div class="kpi"><div class="label">CLASS DAYS</div><strong id="myClassDays">0</strong></div></div>
-          <div class="card"><div class="section-title">Days Present</div><div id="myAttendanceCalendar" class="att-calendar"></div></div>
+          <div class="welcome"><small>Attendance Records</small><h1>My Attendance</h1><p>Attendance records are based on successful QR scans by the instructor.</p></div>
           <div id="myAttendanceTable" class="admin-table-wrap" style="margin-top:20px"></div>
         </div>
 
@@ -447,18 +357,6 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
           <div class="card" style="margin-top:18px"><div class="section-title">Existing Blocks</div><div id="blockCards" class="block-grid"></div></div>
         </div>
 
-
-        <div id="aQRCodes" class="page">
-          <div class="welcome"><small>Student Identification</small><h1>Student QR Codes</h1><p>View and print the unique QR code assigned to each student. The QR payload is the student's Student Number.</p></div>
-          <div class="admin-toolbar">
-            <input id="qrStudentSearch" class="input" placeholder="Search student number or name" oninput="renderAdminQRCodes()">
-            <select id="qrBlockFilter" class="select" onchange="renderAdminQRCodes()"><option value="">All Blocks</option></select>
-            <button class="btn secondary" style="width:auto" onclick="loadAdminQRCodes()">REFRESH</button>
-            <button class="btn primary" style="width:auto" onclick="printAllQRCodes()">PRINT VISIBLE QR CODES</button>
-          </div>
-          <div id="adminQRGrid" class="qr-admin-grid"></div>
-        </div>
-
         <div id="aGrades" class="page">
           <div class="welcome"><small>Grade Management</small><h1>Enter & Publish Grades</h1><p>Changes are saved by student and term. Students only see grades marked as published.</p></div>
           <div class="admin-toolbar">
@@ -493,8 +391,9 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
           <div class="card" style="margin-top:18px"><div class="section-title">Current Session Attendance</div><div id="attendanceSessionTable" class="attendance-table"></div></div>
         </div>
 
-<div id="aAttendanceHistory" class="page"><div class="welcome"><small>Attendance Records</small><h1>Attendance Management</h1><p>View and filter attendance records for all classes and students.</p></div><div class="att-filter-grid"><input id="attSearch" class="input" placeholder="Search student no. or name" oninput="renderAdminAttendance()"><select id="attBlockFilter" class="select" onchange="renderAdminAttendance()"><option value="">All Blocks</option></select><input id="attDateFilter" class="input" type="date" onchange="renderAdminAttendance()"><button class="btn secondary" onclick="loadAdminAttendanceHistory()">REFRESH</button></div><div class="att-summary"><div class="kpi"><div class="label">PRESENT SCANS</div><strong id="attTotalPresent">0</strong></div><div class="kpi"><div class="label">STUDENTS</div><strong id="attTotalStudents">0</strong></div><div class="kpi"><div class="label">CLASS DAYS</div><strong id="attClassDays">0</strong></div><div class="kpi"><div class="label">FILTERED RECORDS</div><strong id="attFiltered">0</strong></div></div><button class="btn primary" style="width:auto;margin-bottom:15px" onclick="exportAttendanceCSV()">EXPORT CSV</button><div id="adminAttendanceTable" class="admin-table-wrap"></div></div>
-        <div id="aMaterials" class="page">
+<div id="aAttendanceHistory" class="page"><div class="welcome"><small>Attendance Records</small><h1>Attendance Management</h1><p>All previous and current attendance records can be filtered here.</p></div><div class="admin-toolbar"><input id="attSearch" class="input" placeholder="Search student no. or name" oninput="renderAdminAttendance()"><select id="attBlockFilter" class="select" onchange="renderAdminAttendance()"><option value="">All Blocks</option></select><input id="attDateFilter" class="input" type="date" onchange="renderAdminAttendance()"><button class="btn secondary" onclick="loadAdminAttendanceHistory()">REFRESH</button></div><div class="kpis"><div class="kpi"><div class="label">PRESENT</div><strong id="attTotalPresent">0</strong></div><div class="kpi"><div class="label">STUDENTS</div><strong id="attTotalStudents">0</strong></div><div class="kpi"><div class="label">CLASS DAYS</div><strong id="attClassDays">0</strong></div><div class="kpi"><div class="label">FILTERED RECORDS</div><strong id="attFiltered">0</strong></div></div><div class="savebar"><button class="btn primary" style="width:auto" onclick="exportAttendanceCSV()">EXPORT CSV</button></div><div id="adminAttendanceTable" class="admin-table-wrap"></div></div>
+
+<div id="aMaterials" class="page">
           <div class="welcome"><small>Instructor Resources</small><h1>Learning Materials</h1><p>Upload, organize, and publish NSTP learning resources for your students.</p></div>
           <div class="card" style="margin-bottom:18px">
             <div class="section-title">Upload New Material</div>
@@ -560,7 +459,7 @@ function nav(id){
 
 function openMobileMenu(){renderMobileNav();$("mobileDrawer")?.classList.add("open");$("mobileOverlay")?.classList.add("open")}
 function closeMobileMenu(){$("mobileDrawer")?.classList.remove("open");$("mobileOverlay")?.classList.remove("open")}
-function mbtn(label,icon,page,fn=""){return `<button data-page="${page}" onclick="nav('${page}');${fn};closeMobileMenu();setTimeout(renderMobileNav,50)">${icon} ${label}</button>`}
+function mbtn(label,icon,page,fn=""){return `<button data-page="${page}" onclick="nav('${page}');${fn};closeMobileMenu()">${icon} ${label}</button>`}
 function renderMobileNav(){
   let n=$("mobileNav"),t=$("mobileMenuTitle");if(!n)return;
   if(isAdmin){
@@ -570,9 +469,9 @@ function renderMobileNav(){
       mbtn("Students","👥","aStudents"),
       mbtn("Blocks & Students","🧩","aBlocks","loadAdminBlocks()"),
       mbtn("Grade Management","📝","aGrades"),
-      mbtn("Student QR Codes","🔳","aQRCodes","loadAdminQRCodes()"),
       mbtn("Learning Materials","📚","aMaterials","loadAdminMaterials()"),
       mbtn("Attendance Scanner","📱","aAttendance","loadAttendancePage()"),
+      mbtn("Attendance Records","📊","aAttendanceHistory","loadAdminAttendanceHistory()"),
       mbtn("Evaluation Results","📋","aEvaluations","loadEvaluationResults()"),
       '<div class="mobile-divider"></div>',
       mbtn("Security","🔐","aSecurity")
@@ -603,61 +502,15 @@ function studentSidebar(){
   <button class="navbtn" data-page="sEvaluation" onclick="nav('sEvaluation');loadEvaluation();closeMobileMenu()">📝 Instructor Evaluation</button>
   <button class="navbtn" data-page="sSecurity" onclick="nav('sSecurity');closeMobileMenu()">🔐 Security</button>`;
 }
-
-let adminQRRoster=[];
-async function loadAdminQRCodes(){
-  try{
-    let {data,error}=await sb.from("student_roster").select("*").order("student_number");
-    if(error)throw error;
-    adminQRRoster=(data||[]).map(x=>({student_number:x.student_number,name:x.full_name||x.name||"",block:x.block||x.section||"",course:x.course||""}));
-    let sel=$("qrBlockFilter");
-    if(sel){
-      let blocks=[...new Set(adminQRRoster.map(x=>x.block).filter(Boolean))].sort();
-      sel.innerHTML='<option value="">All Blocks</option>'+blocks.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join("");
-    }
-    renderAdminQRCodes();
-  }catch(e){
-    let box=$("adminQRGrid");if(box)box.innerHTML=`<div class="eval-note">${esc(e.message||"Unable to load student QR codes.")}</div>`;
-  }
-}
-function renderAdminQRCodes(){
-  let box=$("adminQRGrid");if(!box)return;
-  let q=($("qrStudentSearch")?.value||"").toLowerCase().trim();
-  let b=$("qrBlockFilter")?.value||"";
-  let list=adminQRRoster.filter(x=>(!b||x.block===b)&&(!q||x.student_number.toLowerCase().includes(q)||x.name.toLowerCase().includes(q)));
-  box.innerHTML=list.map((x,i)=>`<div class="qr-admin-card">
-    <div class="qr-mini" id="adminQR_${i}"></div>
-    <div class="qr-no">${esc(x.student_number)}</div>
-    <div class="qr-name">${esc(x.name)}</div>
-    <div class="qr-block">${esc(x.block)}</div>
-    <button class="btn secondary" style="width:auto;margin-top:10px" onclick="printOneQR('${encodeURIComponent(x.student_number)}')">PRINT</button>
-  </div>`).join("")||'<div class="eval-note">No students found.</div>';
-  list.forEach((x,i)=>{
-    let el=$("adminQR_"+i);
-    if(el&&typeof QRCode!=="undefined")new QRCode(el,{text:x.student_number,width:160,height:160,colorDark:"#111827",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
-  });
-}
-function printOneQR(encoded){
-  let sn=decodeURIComponent(encoded),x=adminQRRoster.find(r=>r.student_number===sn);if(!x)return;
-  let w=window.open("","_blank","width=600,height=700");
-  if(!w)return;
-  w.document.write(`<html><head><title>${esc(x.student_number)} QR</title><style>body{font-family:Arial;text-align:center;padding:35px}img{width:320px;height:320px}h1{font-size:20px}p{color:#555}</style></head><body><h1>NSTP STUDENT QR</h1><div id="q"></div><h2>${esc(x.student_number)}</h2><strong>${esc(x.name)}</strong><p>${esc(x.block)}</p><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><script>new QRCode(document.getElementById('q'),{text:${JSON.stringify(x.student_number)},width:320,height:320});setTimeout(()=>window.print(),500)<\/script></body></html>`);
-  w.document.close();
-}
-function printAllQRCodes(){
-  let cards=[...document.querySelectorAll("#adminQRGrid .qr-admin-card")];
-  if(!cards.length)return toast("No QR codes to print.");
-  window.print();
-}
 function adminSidebar(){
   $("sidebar").innerHTML=`<div class="navtitle">Admin Menu</div>
   <button class="navbtn active" data-page="aDashboard" onclick="nav('aDashboard');closeMobileMenu()">📊 Dashboard</button>
   <button class="navbtn" data-page="aStudents" onclick="nav('aStudents');closeMobileMenu()">👥 Students</button>
   <button class="navbtn" data-page="aBlocks" onclick="nav('aBlocks');loadAdminBlocks();closeMobileMenu()">🧩 Blocks & Students</button>
   <button class="navbtn" data-page="aGrades" onclick="nav('aGrades');closeMobileMenu()">📝 Grade Management</button>
-  <button class="navbtn" data-page="aQRCodes" onclick="nav('aQRCodes');loadAdminQRCodes();closeMobileMenu()">🔳 Student QR Codes</button>
   <button class="navbtn" data-page="aMaterials" onclick="nav('aMaterials');loadAdminMaterials();closeMobileMenu()">📚 Learning Materials</button>
   <button class="navbtn" data-page="aAttendance" onclick="nav('aAttendance');loadAttendancePage();closeMobileMenu()">📱 Attendance Scanner</button>
+  <button class="navbtn" data-page="aAttendanceHistory" onclick="nav('aAttendanceHistory');loadAdminAttendanceHistory();closeMobileMenu()">📊 Attendance Records</button>
   <button class="navbtn" data-page="aEvaluations" onclick="nav('aEvaluations');loadEvaluationResults();closeMobileMenu()">📋 Evaluation Results</button>`;
 }
 async function fn(action,payload={}){
@@ -734,11 +587,11 @@ async function startStudent(){
   let {data:p,error}=await sb.from("student_profiles").select("*").eq("id",user.id).single();
   if(error||!p)throw new Error("Student profile could not be loaded.");
   currentProfile=p;
-  $("authView").classList.add("hidden");$("appView").classList.remove("hidden");$("topTitle").textContent="NSTP Student Portal";$("rolePill").textContent="STUDENT";studentSidebar();renderMobileNav();
+  $("authView").classList.add("hidden");$("appView").classList.remove("hidden");$("topTitle").textContent="NSTP Student Portal";$("rolePill").textContent="STUDENT";studentSidebar();
   $("studentPages").classList.remove("hidden");$("adminPages").classList.add("hidden");nav("sDashboard");fillProfile();await loadStudentGrades();
 }
 async function startAdmin(){
-  $("authView").classList.add("hidden");$("appView").classList.remove("hidden");$("topTitle").textContent="LiComCo NSTP Admin Portal";$("rolePill").textContent="ADMIN";adminSidebar();renderMobileNav();
+  $("authView").classList.add("hidden");$("appView").classList.remove("hidden");$("topTitle").textContent="LiComCo NSTP Admin Portal";$("rolePill").textContent="ADMIN";adminSidebar();
   $("studentPages").classList.add("hidden");$("adminPages").classList.remove("hidden");nav("aDashboard");await loadAdminData();await loadAdminGrades();
 }
 function fillProfile(){
@@ -918,15 +771,15 @@ async function loadStudentQR(){
 async function loadMyAttendance(){
   let box=$("myAttendanceTable");if(!box)return;
   try{
-    let {data,error}=await sb.from("nstp_attendance_scans").select("attendance_date,scanned_at,status,block").eq("student_number",currentProfile.student_number).order("attendance_date",{ascending:false}).order("scanned_at",{ascending:false});
-    if(error)throw error; data=data||[];
-    let present=data.filter(x=>String(x.status).toLowerCase()==="present");
-    $("myPresentCount").textContent=present.length;
-    $("myClassDays").textContent=new Set(data.map(x=>x.attendance_date)).size;
-    $("myAttendanceCalendar").innerHTML=present.length?present.map(x=>`<div class="att-day present"><div class="date">${new Date(x.attendance_date+"T00:00:00").toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"})}</div><div class="statusx">✓ PRESENT</div><div style="font-size:9px;color:#6b7280;margin-top:3px">${esc(x.block||"NSTP")}</div></div>`).join(""):'<div class="empty" style="grid-column:1/-1">No days present yet.</div>';
+    let {data,error}=await sb.from("attendance_records").select("attendance_date,scanned_at,status,student_number,full_name,block,attendance_sessions(block)").eq("student_id",currentUser.id).order("attendance_date",{ascending:false}).order("scanned_at",{ascending:false});
+    if(error)throw error;
+    let {data:byNo,error:e2}=await sb.from("attendance_records").select("attendance_date,scanned_at,status,student_number,full_name,block,attendance_sessions(block)").eq("student_number",currentProfile.student_number).order("attendance_date",{ascending:false});
+    if(e2)throw e2;
+    let map=new Map();[...(data||[]),...(byNo||[])].forEach(x=>map.set(`${x.attendance_date}|${x.scanned_at}`,x));
+    data=[...map.values()].sort((a,b)=>String(b.attendance_date).localeCompare(String(a.attendance_date))||String(b.scanned_at).localeCompare(String(a.scanned_at)));
     if(!data.length){box.innerHTML='<div class="empty">No attendance records yet.</div>';return}
-    box.innerHTML='<table class="table"><thead><tr><th>Date</th><th>Class</th><th>Scan Time</th><th>Status</th></tr></thead><tbody>'+data.map(x=>`<tr><td>${esc(x.attendance_date)}</td><td>${esc(x.block||"")}</td><td>${new Date(x.scanned_at).toLocaleString()}</td><td><span class="status">${esc(x.status)}</span></td></tr>`).join("")+'</tbody></table>';
-  }catch(e){console.error(e);box.innerHTML='<div class="empty">Attendance records could not be loaded.</div>'}
+    box.innerHTML='<table class="table"><thead><tr><th>Date</th><th>Class</th><th>Scan Time</th><th>Status</th></tr></thead><tbody>'+data.map(x=>`<tr><td>${esc(x.attendance_date)}</td><td>${esc(x.block||x.attendance_sessions?.block||"")}</td><td>${new Date(x.scanned_at).toLocaleString()}</td><td><span class="status">${esc(x.status)}</span></td></tr>`).join('')+'</tbody></table>';
+  }catch(e){console.error(e);box.innerHTML=`<div class="empty">Attendance records could not be loaded. ${esc(e.message||"")}</div>`}
 }
 async function loadAttendancePage(){let block=todayClass();$("attendanceDay").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"});$("attendanceBlock").textContent=block;if(block!=="No scheduled NSTP class")$("attendanceBlockSelect").value=block;await findActiveAttendanceSession();}
 async function findActiveAttendanceSession(){try{let date=new Date().toISOString().slice(0,10);let {data,error}=await sb.from("attendance_sessions").select("*").eq("attendance_date",date).eq("active",true).maybeSingle();if(error&&error.code!=="PGRST116")throw error;activeAttendanceSession=data||null;updateAttendanceUI();if(data){await loadSessionAttendance();startScanner();}}catch(e){console.error(e)}}
@@ -936,87 +789,13 @@ async function endAttendance(){if(!activeAttendanceSession)return;if(!confirm("E
 function startScanner(){if(attendanceScanner||!activeAttendanceSession)return;attendanceScanner=new Html5Qrcode("qrReader");attendanceScanner.start({facingMode:"environment"},{fps:10,qrbox:{width:240,height:240}},onQrScan,()=>{}).catch(e=>{attendanceScanner=null;setMsg("attendanceMsg","Camera could not start. Allow camera access and use HTTPS (GitHub Pages).")})}
 function stopScanner(){if(attendanceScanner){attendanceScanner.stop().then(()=>{attendanceScanner.clear();attendanceScanner=null}).catch(()=>{attendanceScanner=null})}}
 let lastScanToken="",lastScanAt=0;
-async function onQrScan(decodedText){
-  let now=Date.now(); decodedText=(decodedText||"").trim();
-  if(decodedText===lastScanToken&&now-lastScanAt<3000)return;
-  lastScanToken=decodedText;lastScanAt=now;
-  try{
-    if(!activeAttendanceSession){$("scanResult").textContent="⚠️ Start attendance first.";return}
-    let qr=null;
-    // Accept the printed QR codes: their payload is the Student Number.
-    let {data:byNo,error:noErr}=await sb.from("student_qr_codes").select("student_id,student_number,full_name,block").eq("student_number",decodedText).maybeSingle();
-    if(noErr)throw noErr;
-    qr=byNo;
-    // Also accept the account-generated token QR.
-    if(!qr){
-      let {data:byToken,error:tokErr}=await sb.from("student_qr_codes").select("student_id,student_number,full_name,block").eq("token",decodedText).maybeSingle();
-      if(tokErr)throw tokErr; qr=byToken;
-    }
-    // Final fallback: identify the student directly from the official roster.
-    if(!qr && /^2026-LTS-[0-9]{3}$/.test(decodedText)){
-      let {data:r,error:rosterErr}=await sb.from("student_roster").select("student_number,full_name,block,course").eq("student_number",decodedText).maybeSingle();
-      if(rosterErr)throw rosterErr;
-      if(r)qr={student_number:r.student_number,full_name:r.full_name,block:r.block};
-    }
-    if(!qr){$("scanResult").textContent="❌ QR code not recognized";$("scanSub").textContent=decodedText;return}
-    // Do not allow a student to be marked present in the wrong class block.
-    if(qr.block && activeAttendanceSession.block && qr.block!==activeAttendanceSession.block){
-      $("scanResult").textContent="⚠️ WRONG BLOCK";$("scanSub").textContent=qr.full_name+" • "+qr.block;return
-    }
-    // If the roster fallback has no student_id, find the account by roster/student number.
-    if(!qr.student_id){
-      let {data:acct,error:acctErr}=await sb.from("student_profiles").select("user_id,student_number").eq("student_number",qr.student_number).maybeSingle();
-      if(!acctErr && acct)qr.student_id=acct.user_id;
-    }
-    // Registration is NOT required. Record against the official roster using
-    // nstp_attendance_scans, where student_id is intentionally nullable.
-    let {error:ins}=await sb.from("nstp_attendance_scans").insert({
-      session_id:activeAttendanceSession.id,
-      student_id:qr.student_id || null,
-      student_number:qr.student_number,
-      full_name:qr.full_name,
-      block:qr.block,
-      attendance_date:new Date().toISOString().slice(0,10),
-      status:"Present",
-      scanned_at:new Date().toISOString(),
-      scanned_by:currentUser.id
-    });
-    if(ins){
-      if(ins.code==="23505"){$("scanResult").textContent="⚠️ Already Recorded";$("scanSub").textContent=qr.full_name+" • "+qr.student_number;}
-      else throw ins
-    }else{
-      $("scanResult").textContent="✅ PRESENT";$("scanSub").textContent=qr.full_name+" • "+qr.student_number;await loadSessionAttendance()
-    }
-  }catch(e){console.error(e);$("scanResult").textContent="❌ Scan could not be recorded";$("scanSub").textContent=(e?.message||"Please try again.")+" If this is the first use, run the Attendance SQL setup.";toast(e?.message||"Attendance could not be recorded.");}
-}
-async function loadSessionAttendance(){let box=$("attendanceSessionTable");if(!box||!activeAttendanceSession)return;try{let {data,error}=await sb.from("nstp_attendance_scans").select("student_number,full_name,block,scanned_at,status").eq("session_id",activeAttendanceSession.id).order("scanned_at");if(error)throw error;box.innerHTML=data?.length?'<table class="table"><thead><tr><th>#</th><th>Student No.</th><th>Name</th><th>Block</th><th>Time Scanned</th><th>Status</th></tr></thead><tbody>'+data.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.block)}</td><td>${new Date(x.scanned_at).toLocaleTimeString()}</td><td><span class="status">${esc(x.status)}</span></td></tr>`).join('')+'</tbody></table>':'<div class="empty">No students scanned yet.</div>'}catch(e){console.error(e)}}
+async function onQrScan(decodedText){let now=Date.now();if(decodedText===lastScanToken&&now-lastScanAt<3000)return;lastScanToken=decodedText;lastScanAt=now;try{if(!activeAttendanceSession){$("scanResult").textContent="⚠️ Start attendance first.";return}let {data:qr,error}=await sb.from("student_qr_codes").select("student_id,student_number,full_name,block").eq("token",decodedText).maybeSingle();if(error)throw error;if(!qr&&/^2026-LTS-[0-9]{3}$/.test(decodedText)){let r=await sb.from("student_roster").select("student_number,full_name,block,course").eq("student_number",decodedText).maybeSingle();if(r.error)throw r.error;if(r.data)qr={student_number:r.data.student_number,full_name:r.data.full_name,block:r.data.block,student_id:null}}if(!qr){let r=await sb.from("student_qr_codes").select("student_id,student_number,full_name,block").eq("student_number",decodedText).maybeSingle();if(r.error)throw r.error;qr=r.data}if(!qr){$("scanResult").textContent="❌ QR code not recognized";$("scanSub").textContent=decodedText;return}if(qr.block&&activeAttendanceSession.block&&qr.block!==activeAttendanceSession.block){$("scanResult").textContent="⚠️ WRONG BLOCK";$("scanSub").textContent=qr.full_name+" • "+qr.block;return}let {error:ins}=await sb.from("attendance_records").insert({session_id:activeAttendanceSession.id,student_id:qr.student_id||null,attendance_date:new Date().toISOString().slice(0,10),status:"Present",scanned_at:new Date().toISOString(),scanned_by:currentUser.id,student_number:qr.student_number,full_name:qr.full_name,block:qr.block});if(ins){if(ins.code==="23505"){$("scanResult").textContent="⚠️ Already Recorded";$('scanSub').textContent=qr.full_name+" • "+qr.student_number;}else throw ins}else{$("scanResult").textContent="✅ PRESENT";$('scanSub').textContent=qr.full_name+" • "+qr.student_number;await loadSessionAttendance()}}catch(e){console.error(e);$("scanResult").textContent="❌ Scan could not be recorded";$('scanSub').textContent=e.message||"Please try again."}}
+async function loadSessionAttendance(){let box=$("attendanceSessionTable");if(!box||!activeAttendanceSession)return;try{let {data,error}=await sb.from("attendance_records").select("student_number,full_name,block,scanned_at,status").eq("session_id",activeAttendanceSession.id).order("scanned_at");if(error)throw error;box.innerHTML=data?.length?'<table class="table"><thead><tr><th>#</th><th>Student No.</th><th>Name</th><th>Block</th><th>Time Scanned</th><th>Status</th></tr></thead><tbody>'+data.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.block)}</td><td>${new Date(x.scanned_at).toLocaleTimeString()}</td><td><span class="status">${esc(x.status)}</span></td></tr>`).join('')+'</tbody></table>':'<div class="empty">No students scanned yet.</div>'}catch(e){console.error(e)}}
 
 let adminAttendanceData=[];
-async function loadAdminAttendanceHistory(){
-  try{
-    let {data,error}=await sb.from("nstp_attendance_scans").select("attendance_date,student_number,full_name,block,scanned_at,status").order("attendance_date",{ascending:false}).order("scanned_at",{ascending:false});
-    if(error)throw error; adminAttendanceData=data||[];
-    let sel=$("attBlockFilter"),blocks=[...new Set(adminAttendanceData.map(x=>x.block).filter(Boolean))].sort();
-    sel.innerHTML='<option value="">All Blocks</option>'+blocks.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join("");
-    renderAdminAttendance();
-  }catch(e){$("adminAttendanceTable").innerHTML=`<div class="empty">${esc(e.message||"Attendance records could not be loaded.")}</div>`}
-}
-function renderAdminAttendance(){
-  let q=($("attSearch").value||"").toLowerCase().trim(),b=$("attBlockFilter").value,d=$("attDateFilter").value;
-  let list=adminAttendanceData.filter(x=>(!q||String(x.student_number).toLowerCase().includes(q)||String(x.full_name).toLowerCase().includes(q))&&(!b||x.block===b)&&(!d||x.attendance_date===d));
-  $("attTotalPresent").textContent=list.filter(x=>String(x.status).toLowerCase()==="present").length;
-  $("attTotalStudents").textContent=new Set(list.map(x=>x.student_number)).size;
-  $("attClassDays").textContent=new Set(list.map(x=>x.attendance_date)).size;
-  $("attFiltered").textContent=list.length;
-  $("adminAttendanceTable").innerHTML=list.length?'<table class="table"><thead><tr><th>#</th><th>Date</th><th>Student No.</th><th>Name</th><th>Block</th><th>Scan Time</th><th>Status</th></tr></thead><tbody>'+list.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.attendance_date)}</td><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.block)}</td><td>${new Date(x.scanned_at).toLocaleTimeString()}</td><td><span class="status">${esc(x.status)}</span></td></tr>`).join("")+'</tbody></table>':'<div class="empty">No attendance records match the filters.</div>';
-}
-function exportAttendanceCSV(){
-  let q=($("attSearch").value||"").toLowerCase().trim(),b=$("attBlockFilter").value,d=$("attDateFilter").value;
-  let list=adminAttendanceData.filter(x=>(!q||String(x.student_number).toLowerCase().includes(q)||String(x.full_name).toLowerCase().includes(q))&&(!b||x.block===b)&&(!d||x.attendance_date===d));
-  if(!list.length)return toast("No attendance records to export.");
-  let csv="Date,Student Number,Name,Block,Scan Time,Status\n"+list.map(x=>[x.attendance_date,x.student_number,x.full_name,x.block,new Date(x.scanned_at).toLocaleString(),x.status].map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");
-  let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="NSTP_Attendance.csv";a.click();
-}
+async function loadAdminAttendanceHistory(){try{let {data,error}=await sb.from("attendance_records").select("attendance_date,student_number,full_name,block,scanned_at,status,session_id").order("attendance_date",{ascending:false}).order("scanned_at",{ascending:false});if(error)throw error;adminAttendanceData=data||[];let sel=$("attBlockFilter"),blocks=[...new Set(adminAttendanceData.map(x=>x.block).filter(Boolean))].sort();sel.innerHTML='<option value="">All Blocks</option>'+blocks.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join("");renderAdminAttendance()}catch(e){console.error(e);$("adminAttendanceTable").innerHTML=`<div class="empty">Attendance records could not be loaded. ${esc(e.message||"")}</div>`}}
+function renderAdminAttendance(){let q=($("attSearch")?.value||"").toLowerCase().trim(),b=$("attBlockFilter")?.value||"",d=$("attDateFilter")?.value||"";let list=adminAttendanceData.filter(x=>(!q||String(x.student_number||"").toLowerCase().includes(q)||String(x.full_name||"").toLowerCase().includes(q))&&(!b||x.block===b)&&(!d||x.attendance_date===d));$("attTotalPresent").textContent=list.filter(x=>String(x.status).toLowerCase()==="present").length;$("attTotalStudents").textContent=new Set(list.map(x=>x.student_number)).size;$("attClassDays").textContent=new Set(list.map(x=>x.attendance_date)).size;$("attFiltered").textContent=list.length;$("adminAttendanceTable").innerHTML=list.length?'<table class="table"><thead><tr><th>#</th><th>Date</th><th>Student No.</th><th>Name</th><th>Block</th><th>Scan Time</th><th>Status</th></tr></thead><tbody>'+list.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.attendance_date)}</td><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.block)}</td><td>${new Date(x.scanned_at).toLocaleTimeString()}</td><td><span class="status">${esc(x.status)}</span></td></tr>`).join("")+'</tbody></table>':'<div class="empty">No attendance records match the filters.</div>'}
+function exportAttendanceCSV(){let q=($("attSearch")?.value||"").toLowerCase().trim(),b=$("attBlockFilter")?.value||"",d=$("attDateFilter")?.value||"";let list=adminAttendanceData.filter(x=>(!q||String(x.student_number||"").toLowerCase().includes(q)||String(x.full_name||"").toLowerCase().includes(q))&&(!b||x.block===b)&&(!d||x.attendance_date===d));if(!list.length)return toast("No attendance records to export.");let csv="Date,Student Number,Name,Block,Scan Time,Status\n"+list.map(x=>[x.attendance_date,x.student_number,x.full_name,x.block,new Date(x.scanned_at).toLocaleString(),x.status].map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="NSTP_Attendance.csv";a.click()}
 async function loadAdminBlocks(){
   let cards=$("blockCards"),sel=$("newStudentBlock");if(!cards)return;
   try{
