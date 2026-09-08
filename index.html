@@ -417,7 +417,7 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
           <div class="card" style="margin-top:18px"><div class="section-title">Current Session Attendance</div><div id="attendanceSessionTable" class="attendance-table"></div></div>
         </div>
 
-<div id="aAttendanceHistory" class="page"><div class="welcome"><small>Attendance Records</small><h1>Attendance Management</h1><p>All previous and current attendance records can be filtered here.</p></div><div class="admin-toolbar"><input id="attSearch" class="input" placeholder="Search student no. or name" oninput="loadAdminAttendanceForFilter()"><select id="attBlockFilter" class="select" onchange="renderAdminAttendance()"><option value="">All Blocks</option></select><input id="attDateFilter" class="input" type="date" onchange="renderAdminAttendance()"><button class="btn secondary" onclick="loadAdminAttendanceHistory()">REFRESH</button></div><div class="kpis"><div class="kpi"><div class="label">PRESENT</div><strong id="attTotalPresent">0</strong></div><div class="kpi"><div class="label">STUDENTS</div><strong id="attTotalStudents">0</strong></div><div class="kpi"><div class="label">CLASS DAYS</div><strong id="attClassDays">0</strong></div><div class="kpi"><div class="label">FILTERED RECORDS</div><strong id="attFiltered">0</strong></div></div><div class="savebar"><button class="btn primary" style="width:auto" onclick="exportAttendanceCSV()">EXPORT CSV</button></div><div id="adminAttendanceTable" class="admin-table-wrap"></div></div>
+<div id="aAttendanceHistory" class="page"><div class="welcome"><small>Attendance Records</small><h1>Attendance Management</h1><p>All previous and current attendance records can be filtered here.</p></div><div class="admin-toolbar"><input id="attSearch" class="input" placeholder="Search student no. or name" oninput="loadAdminAttendanceForFilter()"><select id="attBlockFilter" class="select" onchange="loadAdminAttendanceForFilter()"><option value="">All Blocks</option></select><input id="attDateFilter" class="input" type="date" onchange="loadAdminAttendanceForFilter()"><button class="btn secondary" onclick="loadAdminAttendanceHistory()">REFRESH</button></div><div class="kpis"><div class="kpi"><div class="label">PRESENT</div><strong id="attTotalPresent">0</strong></div><div class="kpi"><div class="label">ABSENT</div><strong id="attTotalAbsent">0</strong></div><div class="kpi"><div class="label">EXCUSED</div><strong id="attTotalExcused">0</strong></div><div class="kpi"><div class="label">STUDENTS</div><strong id="attTotalStudents">0</strong></div><div class="kpi"><div class="label">CLASS DAYS</div><strong id="attClassDays">0</strong></div><div class="kpi"><div class="label">FILTERED RECORDS</div><strong id="attFiltered">0</strong></div></div><div class="savebar"><button class="btn primary" style="width:auto" onclick="exportAttendanceCSV()">EXPORT CSV</button></div><div id="adminAttendanceTable" class="admin-table-wrap"></div></div>
 
 <div id="aMaterials" class="page">
           <div class="welcome"><small>Instructor Resources</small><h1>Learning Materials</h1><p>Upload, organize, and publish NSTP learning resources for your students.</p></div>
@@ -1079,10 +1079,13 @@ async function loadEvaluationResults(){
 }
 
 function renderProfileAvatar(path){const wrap=$("profileAvatarWrap");if(!wrap)return;if(!path){wrap.innerHTML='<div class="avatar-placeholder">👤</div>';return;}sb.storage.from('nstp-profile-pictures').createSignedUrl(path,600).then(({data})=>{wrap.innerHTML=data?.signedUrl?`<img class="profile-avatar" src="${data.signedUrl}" alt="Profile picture">`:'<div class="avatar-placeholder">👤</div>'});}
-function printStudentQRCodes(){
-  const cards=[...document.querySelectorAll("#adminQRGrid .qr-admin-card")]; if(!cards.length){toast("No QR codes to print. Click Refresh first.");return;}
-  const w=window.open("","_blank"); if(!w){toast("Please allow pop-ups to print the QR codes.");return;}
-  w.document.write(`<!doctype html><html><head><title>NSTP Student QR Codes</title><style>body{font-family:Arial;padding:20px}h1{font-size:20px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.c{text-align:center;border:1px solid #ddd;padding:10px;break-inside:avoid}.c img{width:150px;height:150px}.n{font-weight:700;font-size:12px;margin-top:5px}.s{font-size:10px;color:#555}@media print{button{display:none}.grid{grid-template-columns:repeat(4,1fr)}}</style></head><body><h1>LiComCo NSTP Student QR Codes — SY 2026–2027</h1><div class="grid">${cards.map(c=>{const img=c.querySelector("img");return `<div class="c">${img?`<img src="${img.src}">`:c.querySelector(".qr-mini")?.innerHTML||""}<div class="n">${c.querySelector("strong")?.textContent||""}</div><div class="s">${c.querySelector("div.muted")?.textContent||""}</div></div>`}).join("")}</div><script>window.onload=()=>window.print()<\/script></body></html>`); w.document.close();
+async function printStudentQRCodes(){
+  const cards=[...document.querySelectorAll("#adminQRGrid .qr-admin-card")];
+  if(!cards.length){toast("No QR codes to print. Click Refresh first.");return;}
+  const items=cards.map(c=>{const canvas=c.querySelector("canvas");const img=c.querySelector("img");return {src:canvas?canvas.toDataURL("image/png"):(img?.src||""),no:c.querySelector("strong")?.textContent||"",block:c.querySelector(".muted")?.textContent||"",name:c.querySelector("div[style*=font-size:11px]")?.textContent||""};});
+  const w=window.open("","_blank");
+  if(!w){toast("Please allow pop-ups to print the QR codes.");return;}
+  w.document.write(`<!doctype html><html><head><title>NSTP Student QR Codes</title><style>body{font-family:Arial;padding:20px}h1{font-size:20px;margin-bottom:18px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.c{text-align:center;border:1px solid #ddd;padding:10px;break-inside:avoid}.c img{width:150px;height:150px;display:block;margin:0 auto}.n{font-weight:700;font-size:12px;margin-top:5px}.name{font-size:11px;margin-top:3px}.s{font-size:10px;color:#555;margin-top:3px}@media print{button{display:none}.grid{grid-template-columns:repeat(4,1fr)}}</style></head><body><h1>LiComCo NSTP Student QR Codes — SY 2026–2027</h1><div class="grid">${items.map(x=>`<div class="c"><img src="${x.src}"><div class="n">${esc(x.no)}</div><div class="name">${esc(x.name)}</div><div class="s">${esc(x.block)}</div></div>`).join("")}</div><script>window.onload=()=>window.print()<\/script></body></html>`); w.document.close();
 }
 async function loadAdminQRCodes(){if(!$('adminQRGrid'))return;try{if(!roster.length)await loadAdminData();let sel=$('qrAdminBlock'),blocks=[...new Set(roster.map(x=>x.section).filter(Boolean))].sort(),old=sel.value;sel.innerHTML='<option value="">All Blocks</option>'+blocks.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join('');if(blocks.includes(old))sel.value=old;renderAdminQRCodes()}catch(e){$('adminQRGrid').innerHTML=`<div class="empty">Could not load QR codes. ${esc(e.message||'')}</div>`}}
 function renderAdminQRCodes(){let q=($('qrAdminSearch')?.value||'').toLowerCase().trim(),b=$('qrAdminBlock')?.value||'',rows=roster.filter(x=>(!q||x.student_number.toLowerCase().includes(q)||x.full_name.toLowerCase().includes(q))&&(!b||x.section===b));$('adminQRGrid').innerHTML=rows.length?rows.map((x,i)=>`<div class="qr-admin-card"><div class="qr-mini" id="adminqr_${i}"></div><strong>${esc(x.student_number)}</strong><div style="font-size:11px;margin-top:4px">${esc(x.full_name)}</div><div class="muted" style="font-size:10px">${esc(x.section)}</div></div>`).join(''):'<div class="empty">No students found.</div>';rows.forEach((x,i)=>new QRCode($('adminqr_'+i),{text:String(x.student_number),width:150,height:150,colorDark:'#111827',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M}))}
@@ -1092,8 +1095,55 @@ function exportAttendanceCSV(){
   const csv="Date,Student Number,Name,Block,Status,Scan Time\n"+rows.map(x=>[x.attendance_date,x.student_number,x.full_name,x.block,x.status,x.scanned_at?new Date(x.scanned_at).toLocaleString():""].map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="NSTP_Attendance.csv";a.click();URL.revokeObjectURL(a.href);
 }
-async function loadAdminAttendanceForFilter(){let date=$('attDateFilter').value||new Date().toISOString().slice(0,10),block=$('attBlockFilter').value;try{let {data:sessions,error:se}=await sb.from('attendance_sessions').select('id,attendance_date,block,active').eq('attendance_date',date);if(se)throw se;let session=block?sessions.find(x=>x.block===block):sessions[0];if(!session){renderAdminAttendanceForRoster([],date,block,'No attendance session was recorded for this date/block.');return}let {data:rec,error:re}=await sb.from('attendance_records').select('student_number,full_name,block,status,scanned_at').eq('session_id',session.id);if(re)throw re;let target=roster.filter(x=>x.section===session.block);renderAdminAttendanceForRoster(target,date,session.block,null,rec||[])}catch(e){$('adminAttendanceTable').innerHTML=`<div class="empty">Attendance could not be loaded. ${esc(e.message||'')}</div>`}}
-function renderAdminAttendanceForRoster(target,date,block,message,records=[]){if(message){$('adminAttendanceTable').innerHTML=`<div class="empty">${esc(message)}</div>`;['attTotalPresent','attTotalAbsent','attTotalExcused','attTotalStudents'].forEach(id=>$(id).textContent='0');return}let map=new Map(records.map(r=>[r.student_number,r])),q=($('attSearch')?.value||'').toLowerCase().trim(),rows=target.filter(x=>!q||x.student_number.toLowerCase().includes(q)||x.full_name.toLowerCase().includes(q)).map(x=>{let r=map.get(x.student_number);return {...x,status:r?.status||'Absent',scanned_at:r?.scanned_at||null}});$('attTotalPresent').textContent=rows.filter(x=>x.status==='Present').length;$('attTotalAbsent').textContent=rows.filter(x=>x.status==='Absent').length;$('attTotalExcused').textContent=rows.filter(x=>x.status==='Excused').length;$('attTotalStudents').textContent=rows.length;window.currentAttendanceExportRows=rows.map(x=>({attendance_date:date,student_number:x.student_number,full_name:x.full_name,block:x.section,status:x.status,scanned_at:x.scanned_at||''}));$('adminAttendanceTable').innerHTML=rows.length?`<table class="table"><thead><tr><th>#</th><th>Student No.</th><th>Name</th><th>Block</th><th>Time</th><th>Status</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.section)}</td><td>${x.scanned_at?new Date(x.scanned_at).toLocaleTimeString():'—'}</td><td class="${x.status==='Present'?'att-status-present':x.status==='Excused'?'att-status-excused':'att-status-absent'}">${esc(x.status)}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">No students match the filter.</div>'}
+async function loadAdminAttendanceForFilter(){
+  const date=$('attDateFilter')?.value||new Date().toISOString().slice(0,10);
+  const block=$('attBlockFilter')?.value||"";
+  try{
+    if(!roster.length) await loadAdminData();
+    const {data:sessions,error:se}=await sb.from('attendance_sessions').select('id,attendance_date,block,active').eq('attendance_date',date);
+    if(se)throw se;
+    const selected=(sessions||[]).filter(x=>!block||x.block===block);
+    const target=roster.filter(x=>!block||x.section===block);
+    if(!selected.length){
+      renderAdminAttendanceForRoster([],date,block,`No attendance session was recorded for ${block?block+' on ':''}${date}.`);
+      $('attClassDays').textContent=0;
+      return;
+    }
+    const ids=selected.map(x=>x.id);
+    const {data:rec,error:re}=await sb.from('attendance_records').select('student_number,full_name,block,status,scanned_at,session_id').in('session_id',ids);
+    if(re)throw re;
+    renderAdminAttendanceForRoster(target,date,block,null,rec||[]);
+    $('attClassDays').textContent=selected.length;
+  }catch(e){
+    console.error(e);
+    $('adminAttendanceTable').innerHTML=`<div class="empty">Attendance could not be loaded. ${esc(e.message||'')}</div>`;
+    ['attTotalPresent','attTotalAbsent','attTotalExcused','attTotalStudents','attClassDays','attFiltered'].forEach(id=>{if($(id))$(id).textContent='0'});
+  }
+}
+
+function renderAdminAttendanceForRoster(target,date,block,message,records=[]){
+  if(message){
+    $('adminAttendanceTable').innerHTML=`<div class="empty">${esc(message)}</div>`;
+    ['attTotalPresent','attTotalAbsent','attTotalExcused','attTotalStudents','attFiltered'].forEach(id=>{if($(id))$(id).textContent='0'});
+    window.currentAttendanceExportRows=[];
+    return;
+  }
+  const map=new Map();
+  (records||[]).forEach(r=>{ if(r.student_number) map.set(r.student_number,r); });
+  const q=($('attSearch')?.value||'').toLowerCase().trim();
+  const rows=target.filter(x=>!q||x.student_number.toLowerCase().includes(q)||x.full_name.toLowerCase().includes(q)).map(x=>{
+    const r=map.get(x.student_number);
+    return {...x,status:r?.status||'Absent',scanned_at:r?.scanned_at||null};
+  });
+  if($('attTotalPresent'))$('attTotalPresent').textContent=rows.filter(x=>x.status==='Present').length;
+  if($('attTotalAbsent'))$('attTotalAbsent').textContent=rows.filter(x=>x.status==='Absent').length;
+  if($('attTotalExcused'))$('attTotalExcused').textContent=rows.filter(x=>x.status==='Excused').length;
+  if($('attTotalStudents'))$('attTotalStudents').textContent=rows.length;
+  if($('attFiltered'))$('attFiltered').textContent=rows.length;
+  window.currentAttendanceExportRows=rows.map(x=>({attendance_date:date,student_number:x.student_number,full_name:x.full_name,block:x.section,status:x.status,scanned_at:x.scanned_at||''}));
+  $('adminAttendanceTable').innerHTML=rows.length?`<table class="table"><thead><tr><th>#</th><th>Student No.</th><th>Name</th><th>Block</th><th>Time</th><th>Status</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.section)}</td><td>${x.scanned_at?new Date(x.scanned_at).toLocaleTimeString():'—'}</td><td class="${x.status==='Present'?'att-status-present':x.status==='Excused'?'att-status-excused':'att-status-absent'}">${esc(x.status)}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">No students match the filter.</div>';
+}
+
 async function loadAdminData(){
   /*
    * The official names/blocks come from student_roster.
@@ -1160,13 +1210,12 @@ async function loadAdminData(){
     showLoader(false);
   }
 }
-function renderStudents(){let q=$('studentSearch').value.trim().toLowerCase(),block=$('studentBlockFilter').value,rows=roster.filter(x=>(!q||x.student_number.toLowerCase().includes(q)||x.full_name.toLowerCase().includes(q))&&(!block||x.section===block));if(!rows.length){$('studentTable').innerHTML='<div class="empty">No students found.</div>';return}$('studentTable').innerHTML='<table class="table"><thead><tr><th>Photo</th><th>Student No.</th><th>Name</th><th>Block</th><th>Email</th><th>Status</th><th></th></tr></thead><tbody>'+rows.map((x,i)=>`<tr><td><div id="studentPhoto_${i}" class="avatar-placeholder" style="width:42px;height:42px;font-size:18px">👤</div></td><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.section)}</td><td>${esc(x.email||'—')}</td><td>${esc(x.account_status||'Not Registered')}</td><td><button class="btn secondary" style="padding:7px 10px" onclick="viewStudent('${x.id||''}')">VIEW</button></td></tr>`).join('')+'</tbody></table>';rows.forEach((x,i)=>{if(x.profile_picture_path)sb.storage.from('nstp-profile-pictures').createSignedUrl(x.profile_picture_path,600).then(({data})=>{if(data?.signedUrl&&$('studentPhoto_'+i))$('studentPhoto_'+i).outerHTML=`<img class="profile-avatar" style="width:42px;height:42px;border-width:2px" src="${data.signedUrl}" alt="Profile">`})})}
+function renderStudents(){let q=$('studentSearch').value.trim().toLowerCase(),block=$('studentBlockFilter').value,rows=roster.filter(x=>(!q||x.student_number.toLowerCase().includes(q)||x.full_name.toLowerCase().includes(q))&&(!block||x.section===block));if(!rows.length){$('studentTable').innerHTML='<div class="empty">No students found.</div>';return}$('studentTable').innerHTML='<table class="table"><thead><tr><th>Photo</th><th>Student No.</th><th>Name</th><th>Block</th><th>Email</th><th>Status</th><th></th></tr></thead><tbody>'+rows.map((x,i)=>`<tr><td><div id="studentPhoto_${i}" class="avatar-placeholder" style="width:42px;height:42px;font-size:18px">👤</div></td><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.section)}</td><td>${esc(x.email||'—')}</td><td>${esc(x.account_status||'Not Registered')}</td><td><button class="btn secondary" style="padding:7px 10px" onclick="viewStudent('${x.id||x.student_number}')">VIEW</button></td></tr>`).join('')+'</tbody></table>';rows.forEach((x,i)=>{if(x.profile_picture_path)sb.storage.from('nstp-profile-pictures').createSignedUrl(x.profile_picture_path,600).then(({data})=>{if(data?.signedUrl&&$('studentPhoto_'+i))$('studentPhoto_'+i).outerHTML=`<img class="profile-avatar" style="width:42px;height:42px;border-width:2px" src="${data.signedUrl}" alt="Profile">`})})}
 function viewStudent(id){
-  let x=roster.find(y=>y.id===id);
-  if(!x && id==="") return;
+  let x=roster.find(y=>y.id===id || y.student_number===id);
   if(!x)return;
   $("modalTitle").textContent=x.full_name;
-  $("modalBody").innerHTML=`<div class="formgrid">
+  $("modalBody").innerHTML=`<div style="display:flex;align-items:center;gap:16px;margin-bottom:18px"><div id="adminModalPhoto" class="avatar-placeholder" style="width:76px;height:76px;font-size:28px">👤</div><div><strong>${esc(x.full_name)}</strong><div class="muted">${esc(x.student_number)} • ${esc(x.section||"")}</div><div class="muted">${esc(x.account_status||"Not Registered")}</div></div></div><div class="formgrid">
   <div class="field"><label>STUDENT NUMBER</label><input class="input" value="${esc(x.student_number)}" readonly></div>
   <div class="field"><label>BLOCK</label><input class="input" value="${esc(x.section)}" readonly></div>
   <div class="field full"><label>EMAIL</label><input class="input" value="${esc(x.email||"—")}" readonly></div>
@@ -1179,6 +1228,7 @@ function viewStudent(id){
   <div class="field"><label>PARENT/GUARDIAN 2</label><input class="input" value="${esc(x.parent2_name||"—")}" readonly></div>
   <div class="field"><label>CONTACT</label><input class="input" value="${esc(x.parent2_contact||"—")}" readonly></div></div>`;
   $("modal").classList.add("show");
+  if(x.profile_picture_path){sb.storage.from("nstp-profile-pictures").createSignedUrl(x.profile_picture_path,600).then(({data})=>{if(data?.signedUrl&&$("adminModalPhoto"))$("adminModalPhoto").outerHTML=`<img id="adminModalPhoto" class="profile-avatar" style="width:76px;height:76px" src="${data.signedUrl}" alt="Profile picture">`;});}
 }
 function closeModal(){$("modal").classList.remove("show")}
 async function completeReset(){
