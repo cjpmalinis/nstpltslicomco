@@ -374,7 +374,7 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
             <button class="btn secondary" onclick="loadAdminGrades()">REFRESH</button>
           </div>
           <div class="savebar" style="justify-content:flex-start;margin:0 0 15px"><button class="btn primary" style="width:auto" onclick="saveAllGrades()">SAVE ALL CHANGES</button><button class="btn secondary" onclick="publishAll(true)">PUBLISH VISIBLE</button><button class="btn ghost" onclick="publishAll(false)">UNPUBLISH VISIBLE</button></div>
-          <div id="gradeTable" class="admin-table-wrap"></div>
+          <div class="kpis" style="margin-top:0"><div class="kpi"><div class="label">STUDENTS IN LIST</div><strong id="gradeStudentCount">0</strong></div><div class="kpi"><div class="label">SCORES ENCODED</div><strong id="gradeEncodedCount">0</strong></div></div><div id="gradeTable" class="admin-table-wrap"></div>
         </div>
 
         <div id="aExamResults" class="page">
@@ -386,13 +386,13 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
             <input id="examTotalItems" class="input" type="number" min="1" max="1000" value="50" placeholder="Total items">
           </div>
           <div class="savebar" style="justify-content:flex-start;margin:0 0 15px"><button class="btn primary" style="width:auto" onclick="saveAllExamResults()">SAVE ALL SCORES</button><button class="btn secondary" onclick="publishAllExamResults(true)">PUBLISH VISIBLE</button><button class="btn ghost" onclick="publishAllExamResults(false)">UNPUBLISH VISIBLE</button></div>
-          <div id="examTable" class="admin-table-wrap"></div>
+          <div class="kpis" style="margin-top:0"><div class="kpi"><div class="label">STUDENTS IN LIST</div><strong id="examStudentCount">0</strong></div><div class="kpi"><div class="label">SCORES ENCODED</div><strong id="examEncodedCount">0</strong></div></div><div id="examTable" class="admin-table-wrap"></div>
         </div>
 
         
         <div id="aStudentQRCodes" class="page">
           <div class="welcome"><small>QR Identification</small><h1>Student QR Codes</h1><p>Every student has a unique QR. The QR contains only the Student Number, so it can be scanned even before account registration.</p></div>
-          <div class="admin-toolbar"><input id="qrAdminSearch" class="input" placeholder="Search student number or name" oninput="renderAdminQRCodes()"><select id="qrAdminBlock" class="select" onchange="renderAdminQRCodes()"><option value="">All Blocks</option></select><button class="btn secondary" onclick="loadAdminQRCodes()">REFRESH</button></div>
+          <div class="admin-toolbar"><input id="qrAdminSearch" class="input" placeholder="Search student number or name" oninput="renderAdminQRCodes()"><select id="qrAdminBlock" class="select" onchange="renderAdminQRCodes()"><option value="">All Blocks</option></select><button class="btn secondary" onclick="loadAdminQRCodes()">REFRESH</button><button class="btn primary" onclick="printStudentQRCodes()">PRINT ALL QR CODES</button></div>
           <div id="adminQRGrid" class="qr-admin-grid" style="margin-top:18px"></div>
         </div>
 
@@ -1079,6 +1079,11 @@ async function loadEvaluationResults(){
 }
 
 function renderProfileAvatar(path){const wrap=$("profileAvatarWrap");if(!wrap)return;if(!path){wrap.innerHTML='<div class="avatar-placeholder">👤</div>';return;}sb.storage.from('nstp-profile-pictures').createSignedUrl(path,600).then(({data})=>{wrap.innerHTML=data?.signedUrl?`<img class="profile-avatar" src="${data.signedUrl}" alt="Profile picture">`:'<div class="avatar-placeholder">👤</div>'});}
+function printStudentQRCodes(){
+  const cards=[...document.querySelectorAll("#adminQRGrid .qr-admin-card")]; if(!cards.length){toast("No QR codes to print. Click Refresh first.");return;}
+  const w=window.open("","_blank"); if(!w){toast("Please allow pop-ups to print the QR codes.");return;}
+  w.document.write(`<!doctype html><html><head><title>NSTP Student QR Codes</title><style>body{font-family:Arial;padding:20px}h1{font-size:20px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.c{text-align:center;border:1px solid #ddd;padding:10px;break-inside:avoid}.c img{width:150px;height:150px}.n{font-weight:700;font-size:12px;margin-top:5px}.s{font-size:10px;color:#555}@media print{button{display:none}.grid{grid-template-columns:repeat(4,1fr)}}</style></head><body><h1>LiComCo NSTP Student QR Codes — SY 2026–2027</h1><div class="grid">${cards.map(c=>{const img=c.querySelector("img");return `<div class="c">${img?`<img src="${img.src}">`:c.querySelector(".qr-mini")?.innerHTML||""}<div class="n">${c.querySelector("strong")?.textContent||""}</div><div class="s">${c.querySelector("div.muted")?.textContent||""}</div></div>`}).join("")}</div><script>window.onload=()=>window.print()<\/script></body></html>`); w.document.close();
+}
 async function loadAdminQRCodes(){if(!$('adminQRGrid'))return;try{if(!roster.length)await loadAdminData();let sel=$('qrAdminBlock'),blocks=[...new Set(roster.map(x=>x.section).filter(Boolean))].sort(),old=sel.value;sel.innerHTML='<option value="">All Blocks</option>'+blocks.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join('');if(blocks.includes(old))sel.value=old;renderAdminQRCodes()}catch(e){$('adminQRGrid').innerHTML=`<div class="empty">Could not load QR codes. ${esc(e.message||'')}</div>`}}
 function renderAdminQRCodes(){let q=($('qrAdminSearch')?.value||'').toLowerCase().trim(),b=$('qrAdminBlock')?.value||'',rows=roster.filter(x=>(!q||x.student_number.toLowerCase().includes(q)||x.full_name.toLowerCase().includes(q))&&(!b||x.section===b));$('adminQRGrid').innerHTML=rows.length?rows.map((x,i)=>`<div class="qr-admin-card"><div class="qr-mini" id="adminqr_${i}"></div><strong>${esc(x.student_number)}</strong><div style="font-size:11px;margin-top:4px">${esc(x.full_name)}</div><div class="muted" style="font-size:10px">${esc(x.section)}</div></div>`).join(''):'<div class="empty">No students found.</div>';rows.forEach((x,i)=>new QRCode($('adminqr_'+i),{text:String(x.student_number),width:150,height:150,colorDark:'#111827',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M}))}
 function exportAttendanceCSV(){
@@ -1101,7 +1106,8 @@ async function loadAdminData(){
     const {data:official,error:rosterError}=await sb
       .from("student_roster")
       .select("student_number,full_name,block,course,academic_year")
-      .order("student_number");
+      .order("student_number")
+      .range(0,999);
 
     if(rosterError) throw rosterError;
 
@@ -1137,6 +1143,8 @@ async function loadAdminData(){
         profile_picture_path:p?.profile_picture_path||""
       };
     });
+
+    if((official||[]).length<97) toast("Only "+(official||[]).length+" roster students are currently in Supabase. Run the Complete Roster SQL to load all 97.");
 
     let blockFilter=$("studentBlockFilter"),gradeBlock=$("gradeBlock");
     let blocks=[...new Set(roster.map(x=>x.section).filter(Boolean))].sort();
@@ -1188,32 +1196,34 @@ async function completeReset(){
 }
 async function loadAdminExamResults(){
   let subject=$("examSubject")?.value,type=$("examType")?.value,block=$("examBlock")?.value; if(!subject||!type)return;
-  let {data:g,error}=await sb.from("exam_results").select("id,student_id,score,total_items,published,remarks,subject,exam_type,academic_year,semester").eq("subject",subject).eq("exam_type",type).eq("academic_year","2026-2027");
-  if(error){toast("Exam results could not be loaded. Run the exam-results SQL first.");return;}
-  let by=new Map((g||[]).map(x=>[x.student_id,x]));
-  adminExamResults=roster.filter(s=>!block||s.section===block).map(s=>({student:s,result:by.get(s.id)||null}));
+  let {data:g,error}=await sb.from("exam_results").select("id,student_id,student_number,score,total_items,published,remarks,subject,exam_type,academic_year,semester").eq("subject",subject).eq("exam_type",type).eq("academic_year","2026-2027").range(0,9999);
+  if(error){toast("Exam results could not be loaded. Run the complete roster/exam SQL first.");return;}
+  let by=new Map((g||[]).map(x=>[x.student_number,x]));
+  adminExamResults=roster.filter(s=>!block||s.section===block).map(s=>({student:s,result:by.get(s.student_number)||null}));
   renderExamTable();
 }
 function renderExamTable(){
+  if($("examStudentCount"))$("examStudentCount").textContent=adminExamResults.length; if($("examEncodedCount"))$("examEncodedCount").textContent=adminExamResults.filter(x=>x.result?.score!==null&&x.result?.score!==undefined).length;
   if(!adminExamResults.length){$("examTable").innerHTML='<div class="empty">No students found.</div>';return;}
   $("examTable").innerHTML='<table class="table"><thead><tr><th>Student No.</th><th>Name</th><th>Block</th><th>Score</th><th>Total Items</th><th>Published</th></tr></thead><tbody>'+adminExamResults.map((x,i)=>`<tr><td>${esc(x.student.student_number)}</td><td>${esc(x.student.full_name)}</td><td>${esc(x.student.section)}</td><td><input id="examScore_${i}" type="number" min="0" step="1" value="${x.result?.score??''}" placeholder="—"></td><td><input id="examItems_${i}" type="number" min="1" step="1" value="${x.result?.total_items??$('examTotalItems')?.value??50}"></td><td><select id="examPub_${i}"><option value="false" ${!x.result?.published?'selected':''}>Draft</option><option value="true" ${x.result?.published?'selected':''}>Published</option></select></td></tr>`).join('')+'</tbody></table>';
 }
 async function saveAllExamResults(){
   showLoader(true);try{
     let subject=$("examSubject").value,type=$("examType").value,semester=subject.startsWith("NSTP 1")?"First Semester":"Second Semester";
-    for(let i=0;i<adminExamResults.length;i++){let x=adminExamResults[i],raw=$("examScore_"+i).value,items=Number($("examItems_"+i).value),published=$("examPub_"+i).value==='true';if(raw==='')continue;let score=Number(raw);if(!Number.isInteger(items)||items<1)throw new Error('Total items must be at least 1 for '+x.student.student_number);if(score<0||score>items)throw new Error('Score must be between 0 and total items for '+x.student.student_number);let payload={student_id:x.student.id,student_number:x.student.student_number,subject,exam_type:type,academic_year:'2026-2027',semester,score,total_items:items,published,remarks:''};let res=x.result?.id?await sb.from('exam_results').update(payload).eq('id',x.result.id):await sb.from('exam_results').insert(payload);if(res.error)throw res.error;}toast('Exam scores saved successfully.');await loadAdminExamResults();
+    for(let i=0;i<adminExamResults.length;i++){let x=adminExamResults[i],raw=$("examScore_"+i).value,items=Number($("examItems_"+i).value),published=$("examPub_"+i).value==='true';if(raw==='')continue;let score=Number(raw);if(!Number.isInteger(items)||items<1)throw new Error('Total items must be at least 1 for '+x.student.student_number);if(score<0||score>items)throw new Error('Score must be between 0 and total items for '+x.student.student_number);let payload={student_id:x.result?.student_id||x.student.id||null,student_number:x.student.student_number,subject,exam_type:type,academic_year:'2026-2027',semester,score,total_items:items,published,remarks:''};let res=x.result?.id?await sb.from('exam_results').update(payload).eq('id',x.result.id):await sb.from('exam_results').upsert(payload,{onConflict:'student_number,subject,exam_type,academic_year'});if(res.error)throw res.error;}toast('Exam scores saved successfully.');await loadAdminExamResults();
   }catch(e){toast(e.message||'Could not save exam scores.')}finally{showLoader(false)}
 }
 async function publishAllExamResults(value){showLoader(true);try{for(let x of adminExamResults){if(!x.result?.id)continue;let {error}=await sb.from('exam_results').update({published:value}).eq('id',x.result.id);if(error)throw error;}toast(value?'Visible exam results published.':'Visible exam results unpublished.');await loadAdminExamResults();}catch(e){toast(e.message)}finally{showLoader(false)}}
 async function loadAdminGrades(){
   let subject=$("gradeSubject").value,term=$("gradeTerm").value,block=$("gradeBlock").value;
-  let {data:g,error}=await sb.from("grades").select("id,student_id,grade,published,remarks,subject,term,academic_year").eq("subject",subject).eq("term",term).eq("academic_year","2026-2027");
-  if(error){toast("Grades could not be loaded.");return}
-  let by=new Map((g||[]).map(x=>[x.student_id,x]));
-  adminGrades=roster.filter(s=>!block||s.section===block).map(s=>({student:s,grade:by.get(s.id)||null}));
+  let {data:g,error}=await sb.from("grades").select("id,student_id,student_number,grade,published,remarks,subject,term,academic_year").eq("subject",subject).eq("term",term).eq("academic_year","2026-2027").range(0,9999);
+  if(error){toast("Grades could not be loaded. Run the complete roster/grade SQL first.");return}
+  let by=new Map((g||[]).map(x=>[x.student_number,x]));
+  adminGrades=roster.filter(s=>!block||s.section===block).map(s=>({student:s,grade:by.get(s.student_number)||null}));
   renderGradeTable();
 }
 function renderGradeTable(){
+  if($("gradeStudentCount"))$("gradeStudentCount").textContent=adminGrades.length; if($("gradeEncodedCount"))$("gradeEncodedCount").textContent=adminGrades.filter(x=>x.grade?.grade!==null&&x.grade?.grade!==undefined).length;
   if(!adminGrades.length){$("gradeTable").innerHTML='<div class="empty">No students found.</div>';return}
   $("gradeTable").innerHTML='<table class="table"><thead><tr><th>Student No.</th><th>Name</th><th>Block</th><th>Grade</th><th>Published</th></tr></thead><tbody>'+adminGrades.map((x,i)=>`<tr><td>${esc(x.student.student_number)}</td><td>${esc(x.student.full_name)}</td><td>${esc(x.student.section)}</td><td><input id="grade_${i}" type="number" min="0" max="100" step="0.01" value="${x.grade?.grade??""}" placeholder="—"></td><td><select id="pub_${i}"><option value="false" ${!x.grade?.published?"selected":""}>Draft</option><option value="true" ${x.grade?.published?"selected":""}>Published</option></select></td></tr>`).join("")+'</tbody></table>';
 }
@@ -1223,12 +1233,12 @@ async function saveAllGrades(){
     let subject=$("gradeSubject").value,term=$("gradeTerm").value,semester=subject.startsWith("NSTP 1")?"First Semester":"Second Semester",program=subject;
     for(let i=0;i<adminGrades.length;i++){
       let x=adminGrades[i],raw=$(("grade_"+i)).value,published=$("pub_"+i).value==="true";
-      let payload={student_id:x.student.id,grade:raw===""?null:Number(raw),published,remarks:"",subject,term,academic_year:"2026-2027",semester,program};
+      let payload={student_id:x.grade?.student_id||x.student.id||null,student_number:x.student.student_number,grade:raw===""?null:Number(raw),published,remarks:"",subject,term,academic_year:"2026-2027",semester,program};
       if(payload.grade!==null&&(payload.grade<0||payload.grade>100))throw new Error("Grade must be between 0 and 100 for "+x.student.student_number);
       if(x.grade?.id){
         let {error}=await sb.from("grades").update(payload).eq("id",x.grade.id);if(error)throw error;
       }else if(payload.grade!==null){
-        let {error}=await sb.from("grades").insert(payload);if(error)throw error;
+        let {error}=await sb.from("grades").upsert(payload,{onConflict:"student_number,subject,term,academic_year"});if(error)throw error;
       }
     }
     toast("Grades saved successfully.");await loadAdminGrades();
