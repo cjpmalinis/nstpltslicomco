@@ -418,7 +418,7 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
         </div>
 
 <div id="aAttendanceHistory" class="page">
-  <div class="welcome"><small>Attendance Records & Manual Checking</small><h1>Attendance Dashboard</h1><p>Review any class date, use QR records when available, or manually mark students as Present, Absent, or Excused. Previous dates can be updated anytime.</p></div>
+  <div class="welcome"><small>Attendance Records & Manual Checking</small><h1>Attendance Dashboard</h1><p>Choose a class date and block. Use QR scanning when convenient, or check the students who are present manually. You can return to any previous class date and update the record.</p></div>
   <div class="admin-toolbar">
     <input id="attSearch" class="input" placeholder="Search student no. or name" oninput="loadAdminAttendanceForFilter()">
     <select id="attBlockFilter" class="select" onchange="loadAdminAttendanceForFilter()"><option value="">All Blocks</option></select>
@@ -440,6 +440,7 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
       <button class="btn primary" style="width:auto" onclick="saveManualAttendance()">SAVE / UPDATE ATTENDANCE</button>
       <button class="btn secondary" style="width:auto" onclick="markAllAttendance('Present')">MARK ALL PRESENT</button>
       <button class="btn secondary" style="width:auto" onclick="markAllAttendance('Absent')">MARK ALL ABSENT</button>
+<button class="btn secondary" style="width:auto" onclick="markAllAttendance('Excused')">MARK ALL EXCUSED</button>
       <button class="btn secondary" style="width:auto" onclick="exportAttendanceCSV()">EXPORT CSV</button>
     </div>
     <div id="adminAttendanceTable" class="admin-table-wrap" style="margin-top:14px"></div>
@@ -472,7 +473,34 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
           <div class="card"><div class="section-title">Published / Uploaded Materials</div><div id="adminMaterials" class="material-grid"></div></div>
         </div>
 
-<div id="aSecurity" class="page"><div class="welcome"><small>Account Security</small><h1>Admin Password &amp; Email</h1><p>Manage the administrator account password and request a password reset email.</p></div><div class="cards2"><div class="section-card"><h3>Change Password</h3><div class="muted">Change your password while you are signed in.</div><div id="adminSecMsg" class="msg" style="margin-top:16px"></div><div class="field" style="margin-top:16px"><label>NEW PASSWORD</label><div class="pw"><input id="adminNewPass" class="input" type="password" minlength="8" placeholder="At least 8 characters"><button class="eye" onclick="togglePw('adminNewPass',this)">👁</button></div></div><div class="field"><label>CONFIRM NEW PASSWORD</label><input id="adminNewPass2" class="input" type="password" minlength="8" placeholder="Repeat password"></div><button class="btn primary" style="width:auto" onclick="changeAdminPassword()">CHANGE PASSWORD</button></div><div class="section-card"><h3>Forgot / Reset Password</h3><div class="muted">Send a secure password-reset link to the administrator's registered email.</div><div id="adminResetMsg" class="msg" style="margin-top:16px"></div><div class="field" style="margin-top:16px"><label>REGISTERED ADMIN EMAIL</label><input id="adminResetEmail" class="input" type="email" placeholder="admin@email.com"></div><button class="btn secondary" style="width:auto" onclick="sendAdminReset()">SEND RESET LINK</button><div class="smallnote">The reset link will return to the published NSTP Student Portal, not localhost.</div></div></div></div>
+<div id="aSecurity" class="page"><div class="welcome"><small>Account Security</small><h1>Admin Password &amp; Email</h1><p>Manage the administrator account password and request a password reset email.</p></div><div class="cards2"><div class="section-card"><h3>Change Password</h3><div class="muted">Change your password while you are signed in.</div><div id="adminSecMsg" class="msg" style="margin-top:16px"></div><div class="field" style="margin-top:16px"><label>NEW PASSWORD</label><div class="pw"><input id="adminNewPass" class="input" type="password" minlength="8" placeholder="At least 8 characters"><button class="eye" onclick="togglePw('adminNewPass',this)">👁</button></div></div><div class="field"><label>CONFIRM NEW PASSWORD</label><input id="adminNewPass2" class="input" type="password" minlength="8" placeholder="Repeat password"></div><button class="btn primary" style="width:auto" onclick="changeAdminPassword()">CHANGE PASSWORD</button></div><div class="section-card"><h3>Forgot / Reset Password</h3><div class="muted">Send a secure password-reset link to the administrator's registered email.</div><div id="adminResetMsg" class="msg" style="margin-top:16px"></div><div class="field" style="margin-top:16px"><label>REGISTERED ADMIN EMAIL</label><input id="adminResetEmail" class="input" type="email" placeholder="admin@email.com"></div><button class="btn secondary" style="width:auto" onclick="sendAdminReset()">SEND RESET LINK</button><div class="smallnote">The reset link will return to the published NSTP Student Portal, not localhost.</div></div></div>
+<div id="adminStudentPasswordCard" class="section-card" style="margin-top:18px">
+  <h3>Student Password Management 🔐</h3>
+  <div class="muted">As the instructor/administrator, you can set a new password for a registered student without knowing the old password.</div>
+  <div id="adminStudentPasswordMsg" class="msg" style="margin-top:16px"></div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="field">
+      <label>STUDENT NUMBER</label>
+      <input id="adminResetStudentNumber" class="input" placeholder="2026-LTS-001">
+    </div>
+    <div class="field">
+      <label>NEW PASSWORD</label>
+      <div class="pw">
+        <input id="adminResetStudentPassword" class="input" type="password" minlength="8" placeholder="At least 8 characters">
+        <button class="eye" type="button" onclick="togglePw('adminResetStudentPassword',this)">👁</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>CONFIRM NEW PASSWORD</label>
+      <input id="adminResetStudentPassword2" class="input" type="password" minlength="8" placeholder="Repeat new password">
+    </div>
+  </div>
+  <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <button class="btn primary" type="button" onclick="adminResetStudentPassword()">SET / RESET STUDENT PASSWORD</button>
+  </div>
+  <div class="smallnote">The student must already have a registered portal account. The password is changed securely on the server; no service-role key is stored in this page.</div>
+</div>
+</div>
 
 <div id="aEvaluations" class="page">
           <div class="welcome"><small>Anonymous Evaluation Summary</small><h1>Instructor Evaluation Results</h1><p>Results are shown in aggregate. Individual student identities are not displayed.</p></div>
@@ -494,6 +522,7 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
 const SUPABASE_URL="https://edqwkorpppwwpibdfrjl.supabase.co";
 const SUPABASE_KEY="sb_publishable_aXpIvVDCADsWrNdj5qPTuA_8Na8uqLd";
 const FUNCTION_URL=SUPABASE_URL+"/functions/v1/student-auth";
+const ADMIN_PASSWORD_FUNCTION_URL=SUPABASE_URL+"/functions/v1/admin-student-password";
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let currentUser=null,currentProfile=null,isAdmin=false,roster=[],adminGrades=[],adminExamResults=[],currentEvaluationSemester="First Semester",attendanceScanner=null,activeAttendanceSession=null;
@@ -578,6 +607,24 @@ function adminSidebar(){
   <button class="navbtn" data-page="aAttendanceHistory" onclick="nav('aAttendanceHistory');loadAdminAttendanceHistory();closeMobileMenu()">📊 Attendance Records</button>
   <button class="navbtn" data-page="aEvaluations" onclick="nav('aEvaluations');loadEvaluationResults();closeMobileMenu()">📋 Evaluation Results</button>  <button class="navbtn" data-page="aSecurity" onclick="nav('aSecurity');loadAdminSecurity();closeMobileMenu()">🔐 Security</button>`;
 }
+
+async function adminPasswordFn(payload={}){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session?.access_token) throw new Error("Administrator session expired. Please sign in again.");
+  const r=await fetch(ADMIN_PASSWORD_FUNCTION_URL,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "apikey":SUPABASE_KEY,
+      "Authorization":"Bearer "+session.access_token
+    },
+    body:JSON.stringify(payload)
+  });
+  let j={}; try{j=await r.json()}catch(e){}
+  if(!r.ok) throw new Error(j.error||j.message||"Password reset request failed.");
+  return j;
+}
+
 async function fn(action,payload={}){
   let r=await fetch(FUNCTION_URL,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_KEY},body:JSON.stringify({action,...payload})});
   let j={};try{j=await r.json()}catch(e){}
@@ -1249,34 +1296,6 @@ async function printStudentQRCodes(){
   const w=window.open("","_blank");
   if(!w){toast("Please allow pop-ups to print the QR codes.");return;}
   w.document.write(`<!doctype html><html><head><title>NSTP Student QR Codes</title><style>body{font-family:Arial;padding:20px}h1{font-size:20px;margin-bottom:18px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.c{text-align:center;border:1px solid #ddd;padding:10px;break-inside:avoid}.c img{width:150px;height:150px;display:block;margin:0 auto}.n{font-weight:700;font-size:12px;margin-top:5px}.name{font-size:11px;margin-top:3px}.s{font-size:10px;color:#555;margin-top:3px}@media print{button{display:none}.grid{grid-template-columns:repeat(4,1fr)}}</style></head><body><h1>LiComCo NSTP Student QR Codes — SY 2026–2027</h1><div class="grid">${items.map(x=>`<div class="c"><img src="${x.src}"><div class="n">${esc(x.no)}</div><div class="name">${esc(x.name)}</div><div class="s">${esc(x.block)}</div></div>`).join("")}</div><script>window.onload=()=>window.print()<\/script>
-<!-- ADMIN STUDENT PASSWORD MANAGEMENT -->
-<div id="adminStudentPasswordPanel" class="panel" style="display:none">
-  <div class="section-head">
-    <div>
-      <h3>Student Password Management</h3>
-      <div class="muted">Instructor/Admin can reset a student's password without knowing the old password.</div>
-    </div>
-  </div>
-  <div class="formgrid">
-    <div class="field">
-      <label>STUDENT NUMBER</label>
-      <input id="adminResetStudentNumber" class="input" placeholder="2026-LTS-001">
-    </div>
-    <div class="field">
-      <label>NEW PASSWORD</label>
-      <input id="adminResetStudentPassword" class="input" type="password" placeholder="At least 8 characters">
-    </div>
-    <div class="field">
-      <label>CONFIRM NEW PASSWORD</label>
-      <input id="adminResetStudentPassword2" class="input" type="password" placeholder="Repeat new password">
-    </div>
-  </div>
-  <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-    <button class="btn primary" type="button" onclick="adminResetStudentPassword()">RESET STUDENT PASSWORD</button>
-    <span id="adminResetStudentMsg" class="muted"></span>
-  </div>
-</div>
-
 </body></html>`); w.document.close();
 }
 async function loadAdminQRCodes(){if(!$('adminQRGrid'))return;try{if(!roster.length)await loadAdminData();let sel=$('qrAdminBlock'),blocks=[...new Set(roster.map(x=>x.section).filter(Boolean))].sort(),old=sel.value;sel.innerHTML='<option value="">All Blocks</option>'+blocks.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join('');if(blocks.includes(old))sel.value=old;renderAdminQRCodes()}catch(e){$('adminQRGrid').innerHTML=`<div class="empty">Could not load QR codes. ${esc(e.message||'')}</div>`}}
@@ -1506,28 +1525,20 @@ async function adminResetStudentPassword(){
   const sn=norm($("adminResetStudentNumber")?.value||"");
   const p=$("adminResetStudentPassword")?.value||"";
   const p2=$("adminResetStudentPassword2")?.value||"";
-  const msg=$("adminResetStudentMsg");
-  if(!validSN(sn)){ if(msg)msg.textContent="Enter a valid Student Number."; return; }
-  if(p.length<8){ if(msg)msg.textContent="Password must contain at least 8 characters."; return; }
-  if(p!==p2){ if(msg)msg.textContent="Passwords do not match."; return; }
-
+  clearMsg("adminStudentPasswordMsg");
+  if(!validSN(sn))return setMsg("adminStudentPasswordMsg","Enter a valid Student Number.");
+  if(p.length<8)return setMsg("adminStudentPasswordMsg","Password must contain at least 8 characters.");
+  if(p!==p2)return setMsg("adminStudentPasswordMsg","Passwords do not match.");
   showLoader(true);
   try{
-    // This action must be handled by the server-side student-auth Edge Function.
-    // The service-role key must NEVER be placed in this HTML.
-    const result=await fn("admin-reset-password",{
-      student_number:sn,
-      new_password:p
-    });
-    if(!result?.success && !result?.message) throw new Error("Password reset could not be completed.");
-    if(msg)msg.textContent=result.message||"Student password reset successfully.";
+    const result=await adminPasswordFn({student_number:sn,new_password:p});
+    setMsg("adminStudentPasswordMsg",result.message||"Student password reset successfully.","ok");
     toast(result.message||"Student password reset successfully.");
     $("adminResetStudentPassword").value="";
     $("adminResetStudentPassword2").value="";
   }catch(e){
     console.error(e);
-    if(msg)msg.textContent=e.message||"Could not reset the student's password.";
-    toast(e.message||"Could not reset the student's password.");
+    setMsg("adminStudentPasswordMsg",e.message||"Could not reset the student's password.");
   }finally{showLoader(false)}
 }
 
