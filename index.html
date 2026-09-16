@@ -1306,55 +1306,6 @@ function exportAttendanceCSV(){
   const csv="Date,Student Number,Name,Block,Status,Scan Time\n"+rows.map(x=>[x.attendance_date,x.student_number,x.full_name,x.block,x.status,x.scanned_at?new Date(x.scanned_at).toLocaleString():""].map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="NSTP_Attendance.csv";a.click();URL.revokeObjectURL(a.href);
 }
-async function loadAdminAttendanceForFilter(){
-  const date=$('attDateFilter')?.value||new Date().toISOString().slice(0,10);
-  const block=$('attBlockFilter')?.value||"";
-  try{
-    if(!roster.length) await loadAdminData();
-    const {data:sessions,error:se}=await sb.from('attendance_sessions').select('id,attendance_date,block,active').eq('attendance_date',date);
-    if(se)throw se;
-    const selected=(sessions||[]).filter(x=>!block||x.block===block);
-    const target=roster.filter(x=>!block||x.section===block);
-    if(!selected.length){
-      renderAdminAttendanceForRoster([],date,block,`No attendance session was recorded for ${block?block+' on ':''}${date}.`);
-      $('attClassDays').textContent=0;
-      return;
-    }
-    const ids=selected.map(x=>x.id);
-    const {data:rec,error:re}=await sb.from('attendance_records').select('student_number,full_name,block,status,scanned_at,session_id').in('session_id',ids);
-    if(re)throw re;
-    renderAdminAttendanceForRoster(target,date,block,null,rec||[]);
-    $('attClassDays').textContent=selected.length;
-  }catch(e){
-    console.error(e);
-    $('adminAttendanceTable').innerHTML=`<div class="empty">Attendance could not be loaded. ${esc(e.message||'')}</div>`;
-    ['attTotalPresent','attTotalAbsent','attTotalExcused','attTotalStudents','attClassDays','attFiltered'].forEach(id=>{if($(id))$(id).textContent='0'});
-  }
-}
-
-function renderAdminAttendanceForRoster(target,date,block,message,records=[]){
-  if(message){
-    $('adminAttendanceTable').innerHTML=`<div class="empty">${esc(message)}</div>`;
-    ['attTotalPresent','attTotalAbsent','attTotalExcused','attTotalStudents','attFiltered'].forEach(id=>{if($(id))$(id).textContent='0'});
-    window.currentAttendanceExportRows=[];
-    return;
-  }
-  const map=new Map();
-  (records||[]).forEach(r=>{ if(r.student_number) map.set(r.student_number,r); });
-  const q=($('attSearch')?.value||'').toLowerCase().trim();
-  const rows=target.filter(x=>!q||x.student_number.toLowerCase().includes(q)||x.full_name.toLowerCase().includes(q)).map(x=>{
-    const r=map.get(x.student_number);
-    return {...x,status:r?.status||'Absent',scanned_at:r?.scanned_at||null};
-  });
-  if($('attTotalPresent'))$('attTotalPresent').textContent=rows.filter(x=>x.status==='Present').length;
-  if($('attTotalAbsent'))$('attTotalAbsent').textContent=rows.filter(x=>x.status==='Absent').length;
-  if($('attTotalExcused'))$('attTotalExcused').textContent=rows.filter(x=>x.status==='Excused').length;
-  if($('attTotalStudents'))$('attTotalStudents').textContent=rows.length;
-  if($('attFiltered'))$('attFiltered').textContent=rows.length;
-  window.currentAttendanceExportRows=rows.map(x=>({attendance_date:date,student_number:x.student_number,full_name:x.full_name,block:x.section,status:x.status,scanned_at:x.scanned_at||''}));
-  $('adminAttendanceTable').innerHTML=rows.length?`<table class="table"><thead><tr><th>#</th><th>Student No.</th><th>Name</th><th>Block</th><th>Time</th><th>Status</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.section)}</td><td>${x.scanned_at?new Date(x.scanned_at).toLocaleTimeString():'—'}</td><td class="${x.status==='Present'?'att-status-present':x.status==='Excused'?'att-status-excused':'att-status-absent'}">${esc(x.status)}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">No students match the filter.</div>';
-}
-
 async function loadAdminData(){
   /*
    * The official names/blocks come from student_roster.
