@@ -417,7 +417,38 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
           <div class="card" style="margin-top:18px"><div class="section-title">Current Session Attendance</div><div id="attendanceSessionTable" class="attendance-table"></div></div>
         </div>
 
-<div id="aAttendanceHistory" class="page"><div class="welcome"><small>Attendance Records</small><h1>Attendance Management</h1><p>All previous and current attendance records can be filtered here.</p></div><div class="admin-toolbar"><input id="attSearch" class="input" placeholder="Search student no. or name" oninput="loadAdminAttendanceForFilter()"><select id="attBlockFilter" class="select" onchange="loadAdminAttendanceForFilter()"><option value="">All Blocks</option></select><input id="attDateFilter" class="input" type="date" onchange="loadAdminAttendanceForFilter()"><button class="btn secondary" onclick="loadAdminAttendanceHistory()">REFRESH</button></div><div class="kpis"><div class="kpi"><div class="label">PRESENT</div><strong id="attTotalPresent">0</strong></div><div class="kpi"><div class="label">ABSENT</div><strong id="attTotalAbsent">0</strong></div><div class="kpi"><div class="label">EXCUSED</div><strong id="attTotalExcused">0</strong></div><div class="kpi"><div class="label">STUDENTS</div><strong id="attTotalStudents">0</strong></div><div class="kpi"><div class="label">CLASS DAYS</div><strong id="attClassDays">0</strong></div><div class="kpi"><div class="label">FILTERED RECORDS</div><strong id="attFiltered">0</strong></div></div><div class="savebar"><button class="btn primary" style="width:auto" onclick="exportAttendanceCSV()">EXPORT CSV</button></div><div id="adminAttendanceTable" class="admin-table-wrap"></div></div>
+<div id="aAttendanceHistory" class="page">
+  <div class="welcome"><small>Attendance Records & Manual Checking</small><h1>Attendance Dashboard</h1><p>Review any class date, use QR records when available, or manually mark students as Present, Absent, or Excused. Previous dates can be updated anytime.</p></div>
+  <div class="admin-toolbar">
+    <input id="attSearch" class="input" placeholder="Search student no. or name" oninput="loadAdminAttendanceForFilter()">
+    <select id="attBlockFilter" class="select" onchange="loadAdminAttendanceForFilter()"><option value="">All Blocks</option></select>
+    <input id="attDateFilter" class="input" type="date" onchange="loadAdminAttendanceForFilter()">
+    <button class="btn secondary" onclick="loadAdminAttendanceHistory()">REFRESH</button>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="label">PRESENT</div><strong id="attTotalPresent">0</strong></div>
+    <div class="kpi"><div class="label">ABSENT</div><strong id="attTotalAbsent">0</strong></div>
+    <div class="kpi"><div class="label">EXCUSED</div><strong id="attTotalExcused">0</strong></div>
+    <div class="kpi"><div class="label">STUDENTS</div><strong id="attTotalStudents">0</strong></div>
+    <div class="kpi"><div class="label">ATTENDANCE %</div><strong id="attPercent">0%</strong></div>
+    <div class="kpi"><div class="label">CLASS DAYS</div><strong id="attClassDays">0</strong></div>
+  </div>
+  <div class="card" style="margin-top:18px">
+    <div class="section-title">Selected Date Attendance</div>
+    <div id="attDashboardSummary" class="eval-note" style="margin-bottom:14px">Select a date and block to load the roster.</div>
+    <div class="savebar" style="justify-content:flex-start;gap:8px;flex-wrap:wrap">
+      <button class="btn primary" style="width:auto" onclick="saveManualAttendance()">SAVE / UPDATE ATTENDANCE</button>
+      <button class="btn secondary" style="width:auto" onclick="markAllAttendance('Present')">MARK ALL PRESENT</button>
+      <button class="btn secondary" style="width:auto" onclick="markAllAttendance('Absent')">MARK ALL ABSENT</button>
+      <button class="btn secondary" style="width:auto" onclick="exportAttendanceCSV()">EXPORT CSV</button>
+    </div>
+    <div id="adminAttendanceTable" class="admin-table-wrap" style="margin-top:14px"></div>
+  </div>
+  <div class="card" style="margin-top:18px">
+    <div class="section-title">Attendance Breakdown</div>
+    <div id="attBreakdown" class="admin-table-wrap"></div>
+  </div>
+</div>
 
 <div id="aMaterials" class="page">
           <div class="welcome"><small>Instructor Resources</small><h1>Learning Materials</h1><p>Upload, organize, and publish NSTP learning resources for your students.</p></div>
@@ -440,6 +471,8 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
           </div>
           <div class="card"><div class="section-title">Published / Uploaded Materials</div><div id="adminMaterials" class="material-grid"></div></div>
         </div>
+
+<div id="aSecurity" class="page"><div class="welcome"><small>Account Security</small><h1>Admin Password &amp; Email</h1><p>Manage the administrator account password and request a password reset email.</p></div><div class="cards2"><div class="section-card"><h3>Change Password</h3><div class="muted">Change your password while you are signed in.</div><div id="adminSecMsg" class="msg" style="margin-top:16px"></div><div class="field" style="margin-top:16px"><label>NEW PASSWORD</label><div class="pw"><input id="adminNewPass" class="input" type="password" minlength="8" placeholder="At least 8 characters"><button class="eye" onclick="togglePw('adminNewPass',this)">👁</button></div></div><div class="field"><label>CONFIRM NEW PASSWORD</label><input id="adminNewPass2" class="input" type="password" minlength="8" placeholder="Repeat password"></div><button class="btn primary" style="width:auto" onclick="changeAdminPassword()">CHANGE PASSWORD</button></div><div class="section-card"><h3>Forgot / Reset Password</h3><div class="muted">Send a secure password-reset link to the administrator's registered email.</div><div id="adminResetMsg" class="msg" style="margin-top:16px"></div><div class="field" style="margin-top:16px"><label>REGISTERED ADMIN EMAIL</label><input id="adminResetEmail" class="input" type="email" placeholder="admin@email.com"></div><button class="btn secondary" style="width:auto" onclick="sendAdminReset()">SEND RESET LINK</button><div class="smallnote">The reset link will return to the published NSTP Student Portal, not localhost.</div></div></div></div>
 
 <div id="aEvaluations" class="page">
           <div class="welcome"><small>Anonymous Evaluation Summary</small><h1>Instructor Evaluation Results</h1><p>Results are shown in aggregate. Individual student identities are not displayed.</p></div>
@@ -543,7 +576,7 @@ function adminSidebar(){
   <button class="navbtn" data-page="aStudentQRCodes" onclick="nav('aStudentQRCodes');loadAdminQRCodes();closeMobileMenu()">🔳 Student QR Codes</button>
   <button class="navbtn" data-page="aAttendance" onclick="nav('aAttendance');loadAttendancePage();closeMobileMenu()">📱 Attendance Scanner</button>
   <button class="navbtn" data-page="aAttendanceHistory" onclick="nav('aAttendanceHistory');loadAdminAttendanceHistory();closeMobileMenu()">📊 Attendance Records</button>
-  <button class="navbtn" data-page="aEvaluations" onclick="nav('aEvaluations');loadEvaluationResults();closeMobileMenu()">📋 Evaluation Results</button>`;
+  <button class="navbtn" data-page="aEvaluations" onclick="nav('aEvaluations');loadEvaluationResults();closeMobileMenu()">📋 Evaluation Results</button>  <button class="navbtn" data-page="aSecurity" onclick="nav('aSecurity');loadAdminSecurity();closeMobileMenu()">🔐 Security</button>`;
 }
 async function fn(action,payload={}){
   let r=await fetch(FUNCTION_URL,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_KEY},body:JSON.stringify({action,...payload})});
@@ -867,7 +900,137 @@ async function onQrScan(decodedText){let now=Date.now();if(decodedText===lastSca
 async function loadSessionAttendance(){let box=$("attendanceSessionTable");if(!box||!activeAttendanceSession)return;try{let {data,error}=await sb.from("attendance_records").select("student_number,full_name,block,scanned_at,status").eq("session_id",activeAttendanceSession.id).order("scanned_at");if(error)throw error;box.innerHTML=data?.length?'<table class="table"><thead><tr><th>#</th><th>Student No.</th><th>Name</th><th>Block</th><th>Time Scanned</th><th>Status</th></tr></thead><tbody>'+data.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.block)}</td><td>${new Date(x.scanned_at).toLocaleTimeString()}</td><td><span class="status">${esc(x.status)}</span></td></tr>`).join('')+'</tbody></table>':'<div class="empty">No students scanned yet.</div>'}catch(e){console.error(e)}}
 
 let adminAttendanceData=[];
-async function loadAdminAttendanceHistory(){try{if(!roster.length)await loadAdminData();let blocks=[...new Set(roster.map(x=>x.section).filter(Boolean))].sort(),sel=$('attBlockFilter'),old=sel.value;sel.innerHTML='<option value="">All Blocks</option>'+blocks.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join('');if(blocks.includes(old))sel.value=old;if(!$('attDateFilter').value)$('attDateFilter').value=new Date().toISOString().slice(0,10);await loadAdminAttendanceForFilter()}catch(e){$('adminAttendanceTable').innerHTML=`<div class="empty">${esc(e.message||'Attendance records could not be loaded.')}</div>`}}
+async function loadAdminAttendanceHistory(){
+  try{
+    if(!roster.length)await loadAdminData();
+    let blocks=[...new Set(roster.map(x=>x.section).filter(Boolean))].sort(),sel=$('attBlockFilter'),old=sel.value;
+    sel.innerHTML='<option value="">All Blocks</option>'+blocks.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join('');
+    if(blocks.includes(old))sel.value=old;
+    if(!$('attDateFilter').value)$('attDateFilter').value=new Date().toISOString().slice(0,10);
+    await loadAdminAttendanceForFilter();
+  }catch(e){
+    if($('adminAttendanceTable'))$('adminAttendanceTable').innerHTML=`<div class="empty">${esc(e.message||'Attendance records could not be loaded.')}</div>`;
+  }
+}
+
+async function ensureAttendanceSession(date,block){
+  let {data:existing,error:e}=await sb.from('attendance_sessions').select('id,attendance_date,block,active').eq('attendance_date',date).eq('block',block).order('id',{ascending:false}).limit(1).maybeSingle();
+  if(e)throw e;
+  if(existing)return existing;
+  let {data:created,error:c}=await sb.from('attendance_sessions').insert({attendance_date:date,block,active:false,started_at:new Date().toISOString(),started_by:currentUser.id,ended_at:new Date().toISOString()}).select('id,attendance_date,block,active').single();
+  if(c)throw c;
+  return created;
+}
+
+async function loadAdminAttendanceForFilter(){
+  const date=$('attDateFilter')?.value||new Date().toISOString().slice(0,10);
+  const block=$('attBlockFilter')?.value||"";
+  try{
+    if(!roster.length)await loadAdminData();
+    const {data:sessions,error:se}=await sb.from('attendance_sessions').select('id,attendance_date,block,active').eq('attendance_date',date);
+    if(se)throw se;
+    const selected=(sessions||[]).filter(x=>!block||x.block===block);
+    const target=roster.filter(x=>!block||x.section===block);
+    let records=[];
+    if(selected.length){
+      const ids=selected.map(x=>x.id);
+      const {data:rec,error:re}=await sb.from('attendance_records').select('student_number,full_name,block,status,scanned_at,session_id').in('session_id',ids);
+      if(re)throw re;
+      records=rec||[];
+    }
+    renderAdminAttendanceForRoster(target,date,block,null,records);
+    $('attClassDays').textContent=selected.length;
+  }catch(e){
+    console.error(e);
+    if($('adminAttendanceTable'))$('adminAttendanceTable').innerHTML=`<div class="empty">Attendance could not be loaded. ${esc(e.message||'')}</div>`;
+    ['attTotalPresent','attTotalAbsent','attTotalExcused','attTotalStudents','attClassDays'].forEach(id=>{if($(id))$(id).textContent='0'});
+    if($('attPercent'))$('attPercent').textContent='0%';
+  }
+}
+
+function renderAdminAttendanceForRoster(target,date,block,message,records=[]){
+  if(message){
+    $('adminAttendanceTable').innerHTML=`<div class="empty">${esc(message)}</div>`;
+    ['attTotalPresent','attTotalAbsent','attTotalExcused','attTotalStudents'].forEach(id=>{if($(id))$(id).textContent='0'});
+    if($('attPercent'))$('attPercent').textContent='0%';
+    window.currentAttendanceExportRows=[]; return;
+  }
+  const map=new Map();
+  (records||[]).forEach(r=>{if(r.student_number)map.set(r.student_number,r)});
+  const q=($('attSearch')?.value||'').toLowerCase().trim();
+  const rows=target.filter(x=>!q||x.student_number.toLowerCase().includes(q)||x.full_name.toLowerCase().includes(q)).map(x=>{
+    const r=map.get(x.student_number); return {...x,status:r?.status||'Absent',scanned_at:r?.scanned_at||null};
+  });
+  const present=rows.filter(x=>x.status==='Present').length, absent=rows.filter(x=>x.status==='Absent').length, excused=rows.filter(x=>x.status==='Excused').length;
+  if($('attTotalPresent'))$('attTotalPresent').textContent=present;
+  if($('attTotalAbsent'))$('attTotalAbsent').textContent=absent;
+  if($('attTotalExcused'))$('attTotalExcused').textContent=excused;
+  if($('attTotalStudents'))$('attTotalStudents').textContent=rows.length;
+  if($('attFiltered'))$('attFiltered').textContent=rows.length;
+  if($('attPercent'))$('attPercent').textContent=(rows.length?Math.round((present/rows.length)*100):0)+'%';
+  if($('attDashboardSummary'))$('attDashboardSummary').innerHTML=`<strong>${esc(block||'All Blocks')}</strong> • <strong>${esc(date)}</strong> • ${present} Present • ${absent} Absent • ${excused} Excused. You can edit this date and save it.`;
+  window.currentAttendanceExportRows=rows.map(x=>({attendance_date:date,student_number:x.student_number,full_name:x.full_name,block:x.section,status:x.status,scanned_at:x.scanned_at||''}));
+  window.currentManualAttendanceRows=rows;
+  $('adminAttendanceTable').innerHTML=rows.length?`<table class="table"><thead><tr><th>#</th><th>Present</th><th>Excused</th><th>Student No.</th><th>Name</th><th>Block</th><th>Status</th><th>Scan Time</th></tr></thead><tbody>${rows.map((x,i)=>`<tr data-att-sn="${esc(x.student_number)}"><td>${i+1}</td><td><input type="checkbox" class="att-present-check" data-sn="${esc(x.student_number)}" ${x.status==='Present'?'checked':''} onchange="setManualAttendanceStatus('${esc(x.student_number)}',this.checked?'Present':'Absent')"></td><td><input type="checkbox" class="att-excused-check" data-sn="${esc(x.student_number)}" ${x.status==='Excused'?'checked':''} onchange="setManualAttendanceStatus('${esc(x.student_number)}',this.checked?'Excused':'Absent')"></td><td>${esc(x.student_number)}</td><td>${esc(x.full_name)}</td><td>${esc(x.section)}</td><td><span id="att_status_${esc(x.student_number)}" class="status">${esc(x.status)}</span></td><td>${x.scanned_at?new Date(x.scanned_at).toLocaleTimeString():''}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">No students found for this selection.</div>';
+  renderAttendanceBreakdown(target,date,block);
+}
+
+function setManualAttendanceStatus(sn,status){
+  const row=document.querySelector(`tr[data-att-sn="${CSS.escape(sn)}"]`); if(!row)return;
+  const p=row.querySelector('.att-present-check'),e=row.querySelector('.att-excused-check');
+  if(status==='Present'){p.checked=true;e.checked=false}else if(status==='Excused'){p.checked=false;e.checked=true}else{p.checked=false;e.checked=false}
+  const st=$('att_status_'+sn); if(st)st.textContent=status;
+  const rows=window.currentManualAttendanceRows||[]; const item=rows.find(x=>x.student_number===sn); if(item)item.status=status;
+  refreshAttendanceKpisFromUI();
+}
+function markAllAttendance(status){
+  (window.currentManualAttendanceRows||[]).forEach(x=>setManualAttendanceStatus(x.student_number,status));
+  refreshAttendanceKpisFromUI();
+}
+function refreshAttendanceKpisFromUI(){
+  const rows=window.currentManualAttendanceRows||[]; let p=0,e=0;
+  rows.forEach(x=>{const r=document.querySelector(`tr[data-att-sn="${CSS.escape(x.student_number)}"]`);if(!r)return;const ps=r.querySelector('.att-present-check')?.checked,ex=r.querySelector('.att-excused-check')?.checked;x.status=ex?'Excused':ps?'Present':'Absent';p+=x.status==='Present';e+=x.status==='Excused'});
+  const a=rows.length-p-e;if($('attTotalPresent'))$('attTotalPresent').textContent=p;if($('attTotalAbsent'))$('attTotalAbsent').textContent=a;if($('attTotalExcused'))$('attTotalExcused').textContent=e;if($('attTotalStudents'))$('attTotalStudents').textContent=rows.length;if($('attPercent'))$('attPercent').textContent=(rows.length?Math.round(p/rows.length*100):0)+'%';
+  window.currentAttendanceExportRows=rows.map(x=>({attendance_date:$('attDateFilter').value,student_number:x.student_number,full_name:x.full_name,block:x.section,status:x.status,scanned_at:x.scanned_at||''}));
+}
+
+async function saveManualAttendance(){
+  const date=$('attDateFilter')?.value||'',block=$('attBlockFilter')?.value||'';
+  if(!date)return toast('Select an attendance date.');
+  if(!block)return toast('Select one class block before saving attendance.');
+  const rows=window.currentManualAttendanceRows||[]; if(!rows.length)return toast('No students to save.');
+  showLoader(true);
+  try{
+    const session=await ensureAttendanceSession(date,block);
+    for(const x of rows){
+      let status=x.status||'Absent';
+      let {data:existing,error:findErr}=await sb.from('attendance_records').select('id').eq('session_id',session.id).eq('student_number',x.student_number).maybeSingle();
+      if(findErr)throw findErr;
+      const payload={session_id:session.id,student_id:x.id||null,attendance_date:date,status,scanned_at:existing?x.scanned_at:null,scanned_by:currentUser.id,student_number:x.student_number,full_name:x.full_name,block:x.section};
+      if(existing){let {error}=await sb.from('attendance_records').update(payload).eq('id',existing.id);if(error)throw error}
+      else{if(status==='Present'||status==='Excused'){payload.scanned_at=new Date().toISOString()}let {error}=await sb.from('attendance_records').insert(payload);if(error)throw error}
+    }
+    toast('Attendance saved successfully.');
+    await loadAdminAttendanceForFilter();
+  }catch(e){console.error(e);toast('Could not save attendance: '+(e.message||'Database error'))}
+  finally{showLoader(false)}
+}
+
+async function renderAttendanceBreakdown(target,date,selectedBlock){
+  const box=$('attBreakdown');if(!box)return;
+  try{
+    const blocks=[...new Set(target.map(x=>x.section).filter(Boolean))];
+    if(!blocks.length){box.innerHTML='<div class="empty">No students found.</div>';return}
+    let html='<table class="table"><thead><tr><th>Block</th><th>Students</th><th>Present</th><th>Absent</th><th>Excused</th><th>Attendance %</th></tr></thead><tbody>';
+    for(const b of blocks){
+      const {data:sess}=await sb.from('attendance_sessions').select('id').eq('attendance_date',date).eq('block',b);
+      let rec=[]; if(sess?.length){const {data:r}=await sb.from('attendance_records').select('student_number,status').in('session_id',sess.map(x=>x.id));rec=r||[]}
+      const map=new Map(rec.map(x=>[x.student_number,x.status]));const rs=target.filter(x=>x.section===b).map(x=>map.get(x.student_number)||'Absent');const p=rs.filter(x=>x==='Present').length,e=rs.filter(x=>x==='Excused').length,a=rs.length-p-e;html+=`<tr><td>${esc(b)}</td><td>${rs.length}</td><td>${p}</td><td>${a}</td><td>${e}</td><td>${rs.length?Math.round(p/rs.length*100):0}%</td></tr>`;
+    }
+    html+='</tbody></table>';box.innerHTML=html;
+  }catch(e){box.innerHTML='<div class="empty">Breakdown could not be loaded.</div>'}
+}
+
 async function addBlock(){
   let name=$("newBlockName").value.trim(),course=$("newBlockCourse").value.trim(),day=$("newBlockDay").value,year=$("newBlockYear").value.trim();
   if(!name||!course||!year)return setMsg("blockMsg","Complete all block fields.");
@@ -1085,7 +1248,36 @@ async function printStudentQRCodes(){
   const items=cards.map(c=>{const canvas=c.querySelector("canvas");const img=c.querySelector("img");return {src:canvas?canvas.toDataURL("image/png"):(img?.src||""),no:c.querySelector("strong")?.textContent||"",block:c.querySelector(".muted")?.textContent||"",name:c.querySelector("div[style*=font-size:11px]")?.textContent||""};});
   const w=window.open("","_blank");
   if(!w){toast("Please allow pop-ups to print the QR codes.");return;}
-  w.document.write(`<!doctype html><html><head><title>NSTP Student QR Codes</title><style>body{font-family:Arial;padding:20px}h1{font-size:20px;margin-bottom:18px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.c{text-align:center;border:1px solid #ddd;padding:10px;break-inside:avoid}.c img{width:150px;height:150px;display:block;margin:0 auto}.n{font-weight:700;font-size:12px;margin-top:5px}.name{font-size:11px;margin-top:3px}.s{font-size:10px;color:#555;margin-top:3px}@media print{button{display:none}.grid{grid-template-columns:repeat(4,1fr)}}</style></head><body><h1>LiComCo NSTP Student QR Codes — SY 2026–2027</h1><div class="grid">${items.map(x=>`<div class="c"><img src="${x.src}"><div class="n">${esc(x.no)}</div><div class="name">${esc(x.name)}</div><div class="s">${esc(x.block)}</div></div>`).join("")}</div><script>window.onload=()=>window.print()<\/script></body></html>`); w.document.close();
+  w.document.write(`<!doctype html><html><head><title>NSTP Student QR Codes</title><style>body{font-family:Arial;padding:20px}h1{font-size:20px;margin-bottom:18px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.c{text-align:center;border:1px solid #ddd;padding:10px;break-inside:avoid}.c img{width:150px;height:150px;display:block;margin:0 auto}.n{font-weight:700;font-size:12px;margin-top:5px}.name{font-size:11px;margin-top:3px}.s{font-size:10px;color:#555;margin-top:3px}@media print{button{display:none}.grid{grid-template-columns:repeat(4,1fr)}}</style></head><body><h1>LiComCo NSTP Student QR Codes — SY 2026–2027</h1><div class="grid">${items.map(x=>`<div class="c"><img src="${x.src}"><div class="n">${esc(x.no)}</div><div class="name">${esc(x.name)}</div><div class="s">${esc(x.block)}</div></div>`).join("")}</div><script>window.onload=()=>window.print()<\/script>
+<!-- ADMIN STUDENT PASSWORD MANAGEMENT -->
+<div id="adminStudentPasswordPanel" class="panel" style="display:none">
+  <div class="section-head">
+    <div>
+      <h3>Student Password Management</h3>
+      <div class="muted">Instructor/Admin can reset a student's password without knowing the old password.</div>
+    </div>
+  </div>
+  <div class="formgrid">
+    <div class="field">
+      <label>STUDENT NUMBER</label>
+      <input id="adminResetStudentNumber" class="input" placeholder="2026-LTS-001">
+    </div>
+    <div class="field">
+      <label>NEW PASSWORD</label>
+      <input id="adminResetStudentPassword" class="input" type="password" placeholder="At least 8 characters">
+    </div>
+    <div class="field">
+      <label>CONFIRM NEW PASSWORD</label>
+      <input id="adminResetStudentPassword2" class="input" type="password" placeholder="Repeat new password">
+    </div>
+  </div>
+  <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <button class="btn primary" type="button" onclick="adminResetStudentPassword()">RESET STUDENT PASSWORD</button>
+    <span id="adminResetStudentMsg" class="muted"></span>
+  </div>
+</div>
+
+</body></html>`); w.document.close();
 }
 async function loadAdminQRCodes(){if(!$('adminQRGrid'))return;try{if(!roster.length)await loadAdminData();let sel=$('qrAdminBlock'),blocks=[...new Set(roster.map(x=>x.section).filter(Boolean))].sort(),old=sel.value;sel.innerHTML='<option value="">All Blocks</option>'+blocks.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join('');if(blocks.includes(old))sel.value=old;renderAdminQRCodes()}catch(e){$('adminQRGrid').innerHTML=`<div class="empty">Could not load QR codes. ${esc(e.message||'')}</div>`}}
 function renderAdminQRCodes(){let q=($('qrAdminSearch')?.value||'').toLowerCase().trim(),b=$('qrAdminBlock')?.value||'',rows=roster.filter(x=>(!q||x.student_number.toLowerCase().includes(q)||x.full_name.toLowerCase().includes(q))&&(!b||x.section===b));$('adminQRGrid').innerHTML=rows.length?rows.map((x,i)=>`<div class="qr-admin-card"><div class="qr-mini" id="adminqr_${i}"></div><strong>${esc(x.student_number)}</strong><div style="font-size:11px;margin-top:4px">${esc(x.full_name)}</div><div class="muted" style="font-size:10px">${esc(x.section)}</div></div>`).join(''):'<div class="empty">No students found.</div>';rows.forEach((x,i)=>new QRCode($('adminqr_'+i),{text:String(x.student_number),width:150,height:150,colorDark:'#111827',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M}))}
@@ -1305,6 +1497,40 @@ async function publishAll(value){
     toast(value?"Visible grades published.":"Visible grades unpublished.");await loadAdminGrades();
   }catch(e){toast(e.message)}finally{showLoader(false)}
 }
+function loadAdminSecurity(){if($('adminResetEmail')&&currentUser?.email)$('adminResetEmail').value=currentUser.email;clearMsg('adminSecMsg');clearMsg('adminResetMsg');}
+async function changeAdminPassword(){const p=$('adminNewPass').value,p2=$('adminNewPass2').value;if(p.length<8)return setMsg('adminSecMsg','Password must contain at least 8 characters.');if(p!==p2)return setMsg('adminSecMsg','Passwords do not match.');showLoader(true);try{const {error}=await sb.auth.updateUser({password:p});if(error)throw error;setMsg('adminSecMsg','Administrator password changed successfully.','ok');$('adminNewPass').value='';$('adminNewPass2').value='';}catch(e){setMsg('adminSecMsg',e.message||'Unable to change password.')}finally{showLoader(false)}}
+async function sendAdminReset(){const email=($('adminResetEmail').value||'').trim().toLowerCase();if(!email)return setMsg('adminResetMsg','Enter the registered administrator email.');if(!/^\S+@\S+\.\S+$/.test(email))return setMsg('adminResetMsg','Enter a valid email address.');showLoader(true);try{const redirectTo=location.origin+location.pathname;const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});if(error)throw error;setMsg('adminResetMsg','Password reset link sent. Please check the administrator email inbox.','ok');}catch(e){setMsg('adminResetMsg',e.message||'Unable to send the reset link.')}finally{showLoader(false)}}
+
+
+async function adminResetStudentPassword(){
+  const sn=norm($("adminResetStudentNumber")?.value||"");
+  const p=$("adminResetStudentPassword")?.value||"";
+  const p2=$("adminResetStudentPassword2")?.value||"";
+  const msg=$("adminResetStudentMsg");
+  if(!validSN(sn)){ if(msg)msg.textContent="Enter a valid Student Number."; return; }
+  if(p.length<8){ if(msg)msg.textContent="Password must contain at least 8 characters."; return; }
+  if(p!==p2){ if(msg)msg.textContent="Passwords do not match."; return; }
+
+  showLoader(true);
+  try{
+    // This action must be handled by the server-side student-auth Edge Function.
+    // The service-role key must NEVER be placed in this HTML.
+    const result=await fn("admin-reset-password",{
+      student_number:sn,
+      new_password:p
+    });
+    if(!result?.success && !result?.message) throw new Error("Password reset could not be completed.");
+    if(msg)msg.textContent=result.message||"Student password reset successfully.";
+    toast(result.message||"Student password reset successfully.");
+    $("adminResetStudentPassword").value="";
+    $("adminResetStudentPassword2").value="";
+  }catch(e){
+    console.error(e);
+    if(msg)msg.textContent=e.message||"Could not reset the student's password.";
+    toast(e.message||"Could not reset the student's password.");
+  }finally{showLoader(false)}
+}
+
 async function logout(){showLoader(true);await sb.auth.signOut();currentUser=null;currentProfile=null;isAdmin=false;$("appView").classList.add("hidden");$("authView").classList.remove("hidden");showBox("login");showLoader(false)}
 async function checkSession(){
   const hash=location.hash||"";
